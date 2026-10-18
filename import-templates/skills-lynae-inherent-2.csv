@@ -1,0 +1,4 @@
+resonator_id,skill_type,name,description
+Lynae,Inherent Skill 2,Adaptive Optics,"Casting Intro Skill - Time to Show Some Colors! increases Lynae's Spectro DMG by **25%** for **9s**.
+
+During Kaleidoscopic Parade, if Lynae isn't in combat, dodging without directional input grants her Optic Camo for **15s**, which will be removed when Lynae casts any skill other than dodging or is switched off the field. Performing environmental, gameplay or functional interactions, or entering combat, removes the Optic Camo. With Optic Camo, Lynae may enter an enemy's aggro range without triggering combat."

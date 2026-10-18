@@ -1,0 +1,98 @@
+resonator_id,skill_type,skill_category,name,order,description
+Rover Aero,Basic Attack,Active,Wind Cutter,1,"Perform up to **4** consecutive attacks, dealing Aero DMG.
+
+Consume STA to attack the target, dealing Aero DMG.
+- Press Normal Attack right after casting the skill to perform **Basic Attack Stage 3** directly.
+
+Hold Normal Attack after casting **Basic Attack Stage 3**, Dodge Counter, or Heavy Attack to cast Heavy Attack Razor Wind. Consume STA to attack the target, dealing Aero DMG.
+
+Consume STA to perform Plunging Attack, dealing Aero DMG.
+- Press Normal Attack shortly after landing to cast **Basic Attack Stage 4**.
+- At max Windstrings, press Normal Attack shortly after landing to cast Resonance Skill Unbound Flow.
+
+Press Normal Attack right after a successful Dodge to attack the target, dealing Aero DMG."
+Rover Aero,Resonance Skill,Active,Illusion Breaker,2,"Jump up into the mid-air and slash the target, dealing Aero DMG.
+
+While in mid-air, press Resonance Skill to deal Aero DMG, which removes all stacks of Spectro Frazzle, Havoc Bane, Fusion Burst, Glacio Chafe, and Electro Flare from the target hit and inflicts **1** stack of Aero Erosion for each stack removed."
+Rover Aero,Resonance Liberation,Active,Omega Storm,3,"Unleash the power of the Eye of Tempest, dealing Aero DMG and healing all nearby Resonators in the team.
+Can be cast in mid-air close to the ground."
+Rover Aero,Forte Circuit,Passive,Cycle of Wind,4,"Perform up to **2** consecutive attacks, dealing Aero DMG (considered Resonance Skill DMG) and healing all nearby Resonators in the team. Cast through the following **3** ways:
+- Press Normal Attack right after casting Resonance Skill Awakening Gale.
+- Press Normal Attack right after casting Intro Skill.
+- Press Normal Attack right after casting Heavy Attack Razor Wind.
+When casting Mid-air Attack Cloudburst Dance, hold Normal Attack to perform Mid-air Attack.
+
+At max Windstrings, Resonance Skill Awakening Gale becomes Resonance Skill Unbound Flow: Perform up to **2** consecutive attacks. Each attack consumes **60** Windstrings, dealing Aero DMG, considered Resonance Skill DMG.
+Switching to another Resonator after Stage **1** automatically triggers Stage **2** of this skill.
+
+Rover can hold up to **120** Windstrings.
+Each stage of Mid-air Attack Cloudburst Dance restores **25** Windstrings on hit.
+Casting Intro Skill restores **20** Windstrings.
+Hitting a target with **Basic Attack Stage 3 or 4** or Dodge Counter restores **10** Windstrings."
+Rover Aero,Inherent Skill 1,Passive,Sand in the Storm,5,Casting Intro Skill Relentless Squall increases ATK by **20%** for **10s**.
+Rover Aero,Inherent Skill 2,Passive,Boundless Winds,6,Increase Healing from Resonance Liberation Omega Storm by **20%**.
+Rover Aero,Intro Skill,Concerto,Relentless Squall,7,Deal Aero DMG.
+Rover Aero,Outro Skill,Concerto,Storm's Echo,8,"Grant Aeolian Realm to all nearby Resonators in the team for **30s**. Aeolian Realm effect:
+- Upon hitting a target, increase the maximum stack of Aero Erosion the target can receive by **3** for **10s**. This effect is not stackable."
+Rover Aero,Sequence 1,Chain,Storm Subsides in the Void,9,Casting Mid-air Attack Cloudburst Dance enhances Rover's resistance to interruption for **3s**.
+Rover Aero,Sequence 2,Chain,Glimmers Fade into the Dark,10,"Casting Resonance Skill Unbound Flow continuously restores HP for the Resonator on the field by **20%** of Rover's ATK every **3s** for **30s**. When the Resonator on the field has an HP lower than **35%**, immediately restore **10%** of their lost HP. This restoration effect can be triggered once every **10s** and will not be affected by any Healing Bonus."
+Rover Aero,Sequence 3,Chain,Illusions Collapse in a Grip,11,Aero DMG Bonus is increased by **15%**.
+Rover Aero,Sequence 4,Chain,Boundaries Shatter in an Instant,12,Casting Mid-air Attack Cloudburst Dance increases Resonance Skill DMG Bonus by **15%** for **5s**.
+Rover Aero,Sequence 5,Chain,Life and Death Intertwine,13,The DMG Multiplier of Resonance Liberation Omega Storm is increased by **20%**.
+Rover Aero,Sequence 6,Chain,All Crumble in the Wind,14,The DMG Multiplier of Resonance Skill Unbound Flow is increased by **30%**.
+Rover Electro,Basic Attack,Active,Deterrence,1,"Perform up to **4** consecutive attacks, dealing Electro DMG.
+
+Hold Normal Attack to enter Parry Stance at the cost of STA.
+While active, Rover is immune to interruptions, takes **60%** less DMG, and continuously consumes STA. Release Normal Attack to exit Parry Stance and perform Basic Attack - Riposte Strike, dealing Electro DMG.
+If an attack hits Rover during a certain period of Basic Attack - Riposte Strike, neutralize this attack and temporarily Stagnate the target before performing Basic Attack - Riposte Strike: Crumble, dealing Electro DMG.
+Press Normal Attack shortly after casting Basic Attack - Riposte Strike to cast **Basic Attack Stage 2**.
+Press Normal Attack shortly after casting Basic Attack - Riposte Strike: Crumble to cast Mid-air Attack - Havoc
+In Parry Stance, use Dodge to consume STA to perform Dodge: Flicker, which can trigger successful Dodges during the action of this skill shortly after it's cast.
+
+Consume STA to perform a Plunging Attack from mid-air, dealing Electro DMG.
+
+Perform up to **3** consecutive strikes, dealing Havoc DMG. Press Normal Attack shortly after casting Stage **3** of this skill to perform Basic Attack - Repel.
+
+Press Normal Attack right after a successful Dodge to attack the target, dealing Electro DMG.
+Press Normal Attack shortly after to perform **Basic Attack Stage 3**.
+
+Press Normal Attack right after a successful Dodge in mid-air to perform Plunging Attack at the cost of STA, dealing Electro DMG."
+Rover Electro,Resonance Skill,Active,Thunderclap,2,"Launch the Cloudrift Bolt and grapple towards the target, dealing Electro DMG. Press Normal Attack shortly after to cast Basic Attack - Repel, dealing Electro DMG, considered Basic Attack DMG."
+Rover Electro,Resonance Liberation,Active,Ultimate Tactics,3,"Launch the Thunder Quietus, dealing Electro DMG."
+Rover Electro,Forte Circuit,Passive,Myriad Omens' Mandate,4,"At max Electric Surge, Resonance Skill is replaced with Resonance Skill Overshock, dealing Electro DMG.
+Press Normal Attack shortly after casting this skill to perform **Normal Attack Stage 4**.
+This skill can be cast in mid-air.
+If Resonance Skill Overshock is cast by pressing the button, clear all Electric Surge to grant Resonators in the team **10%** ATK Bonus for **20s**.
+If Resonance Skill Overshock is cast by holding down the button, consume **60** points of Concerto Energy to deal damage, then clear all Electric Surge to enter Apex Resonance.
+
+While in Apex Resonance, Resonance Skill Thrum of All Sounds is unlocked, which consumes **10%** Thunder Rage per second:
+While on the ground, press Resonance Skill to launch up to **7** consecutive attacks:
+- The first **3** stages: Thrum of All Sounds: Spectro, dealing Spectro DMG.
+- The next **3** stages: Thrum of All Sounds: Havoc, dealing Havoc DMG.
+- The last **1** stages: Thrum of All Sounds: Silencing Blade, dealing Aero DMG.
+While on the ground, hold Resonance Skill to cast Thrum of All Sounds: Aero, dealing Aero DMG and leaping into the air.
+While airborne, press Resonance Skill to perform up to **6** stages of Mid-air Attacks:
+- The first **3** stages: Thrum of All Sounds: Havoc Mid-air Attack, dealing Havoc DMG.
+- The next **2** stages: Thrum of All Sounds: Aero Mid-air Attack, dealing Aero DMG and healing all nearby Resonators in the team.
+- The last **1** stage: Thrum of All Sounds: Aero Plunging Attack, dealing Aero DMG. Press Resonance Skill shortly after landing to cast Thrum of All Sounds: Silencing Blade.
+Hold Resonance Skill in mid-air to cast Thrum of All Sounds: Aero Plunging Attack.
+Each time Thrum of All Sounds hits the target, Thunder Bane is triggered, dealing Electro DMG to the target within range, considered Resonance Skill DMG.
+While in Apex Resonance, press Resonance Skill shortly after casting a Basic Attack to chain into a specific Thrum of All Sounds skill based on the different Basic Attack Stages.
+
+Rover can hold up to **120** points of Electric Surge.
+Electric Surge is restored when Intro Skill - Thunderous Fury, Normal Attack - Deterrence, Resonance Skill - Thunderclap, or Basic Attack - Repel deals damage.
+
+Rover can hold up to **100** points of Thunder Rage.
+Entering Apex Resonance restores Thunder Rage to the max limit.
+Thunder Rage is restored when Thrum of All Sounds deals damage."
+Rover Electro,Inherent Skill 1,Passive,Decipher,5,Resonance Skill Overshock inflicts **10** stacks of Electro Flare on the target it damages.
+Rover Electro,Inherent Skill 2,Passive,Regression,6,"When Resonance Skill Overshock is cast by holding down the button, gain **20%** Resonance Skill DMG Bonus for **20s**. Switching to another Resonator ends this effect."
+Rover Electro,Intro Skill,Concerto,Thunderous Fury,7,"Attack the target, dealing Electro DMG."
+Rover Electro,Outro Skill,Concerto,Rumbling Thunders,8,"The incoming Resonator gains Electro Core for **20s** or until the Resonator is switched out. After Resonators with Electro Core inflict Negative Statuses, their Electro Core is consumed, and they gain **25%** All DMG Amplification for **14s**. Switching to another Resonator ends the effect.
+Casting Outro Skill ends the Apex Resonance state and clears all Thunder Rage."
+Rover Electro,Sequence 1,Chain,Celestial Ingenuity,9,"While casting Normal Attack and Resonance Skill Thrum of All Sounds, gain increased resistance to interruption for **0.5s**."
+Rover Electro,Sequence 2,Chain,Thousandfold Artifice,10,Inflict **5** stacks of Electro Flare on the targets hit after Resonance Liberation Ultimate Tactics deals damage.
+Rover Electro,Sequence 3,Chain,Alchemy of Wonders,11,The DMG Multiplier of Resonance Skill Overshock is increased by **20%**.
+Rover Electro,Sequence 4,Chain,Earthquaking Rumble,12,The DMG Multiplier of Resonance Liberation Ultimate Tactics is increased by **20%**.
+Rover Electro,Sequence 5,Chain,Principle of Change,13,Crit. DMG is increased by **20%** while in Apex Resonance.
+Rover Electro,Sequence 6,Chain,Mind's Depths in a Casket,14,The DMG Multiplier of Resonance Skill Thrum of All Sounds and Thunder Bane is increased by **20%**.

@@ -1,0 +1,199 @@
+name,cost,class,description
+Tempest Mephis,4,Overlord,"Transform into Tempest Mephis to perform tail swing attacks followed by a claw attack. The lightning strike summoned by the tail swing deals **102.48%** Electro DMG each time, while the claw attack deals **175.68%** Electro DMG.
+
+After the claw hit, increase the current character's Electro DMG by **12.00%** and Heavy Attack DMG by **12.00%** for **15s**."
+Galescourge Stalker,1,Common,"Summon a Galescourge Stalker that restores nearby party members' HP by **2.70%** of their Max HP, up to **3** times.
+CD: **8s**."
+Voltscourge Stalker,1,Common,"Summon a Voltscourge Stalker to perform **3** stages of attacks on enemies, each dealing **43.20%** Electro DMG.
+CD: **8s**."
+Frostscourge Stalker,1,Common,"Summon a Frostscourge Stalker to attack enemies, dealing **129.60%** Glacio DMG.
+CD: **8s**."
+Fae Ignis,1,Common,"Summon a Fae Ignis to attack enemies, dealing **129.60%** Havoc DMG.
+CD: **8s**."
+Nimbus Wraith,1,Common,"Summon a Nimbus Wraith that restores the active Resonator's HP by **2.70%** of their Max HP, up to **4** times.
+CD: **15s**."
+Hocus Pocus,1,Common,"Summon a Hocus Pocus to attack enemies with **3** consecutive strikes, each dealing **43.20%** Havoc DMG.
+CD: **8s**."
+Lottie Lost,1,Common,"Summon a Lottie Lost to attack enemies, dealing **129.60%** Spectro DMG.
+CD: **8s**."
+Diggy Duggy,1,Common,"Transform into Diggy Duggy and jump up into the air to smash onto enemies, dealing **268.20%** Physical DMG.
+CD: **15s**."
+Chest Mimic,1,Common,"Summon a Chest Mimic to attack enemies with **3** consecutive strikes, each dealing **64.19%** Spectro DMG.
+CD: **15s**."
+Questless Knight,3,Elite,"Transform into Questless Knight and smash the surrounding enemies, dealing **313.20%** Electro DMG.
+CD: **20s**."
+Diurnus Knight,3,Elite,"Transform into Diurnus Knight and charge forward to attack enemies with the sword, dealing **268.20%** Spectro DMG. DMG dealt to enemies inflicted by Spectro Frazzle is increased by **100.00%**.
+CD: **15s**."
+Nocturnus Knight,3,Elite,"Transform into Nocturnus Knight and strike enemies in front of you from the air, dealing **268.20%** Havoc DMG.
+CD: **15s**."
+Abyssal Patricius,3,Elite,"Transform into Abyssal Patricius and charge forward to attack enemies, dealing **268.20%** Glacio DMG.
+The Resonator with this Echo equipped in the main slot gains **12.00%** Glacio DMG Bonus.
+CD: **15s**."
+Abyssal Gladius,3,Elite,"Transform into Abyssal Gladius and attack enemies in front of you with the sword, dealing **268.20%** Glacio DMG.
+Hold the Echo Skill to maintain the Echo form for a while to slash enemies and cast a ranged attack forward, dealing **268.20%** and **670.50%** Glacio DMG respectively.
+CD: **15s**."
+Abyssal Mercator,3,Elite,"Transform into Abyssal Mercator and summon **3** Ice Spikes to attack enemies, each dealing **89.39%** Glacio DMG.
+CD: **15s**."
+Chop Chop,3,Elite,"Summon a Chop Chop to perform a series of consecutive attacks. The first **6** strikes each deal **19.26%** Fusion DMG and finishing strike deals **77.04%** Fusion DMG.
+CD: **15s**."
+Vitreum Dancer,3,Elite,"Transform into Vitreum Dancer and attack surrounding enemies, dealing **313.20%** Electro DMG.
+The Resonator with this Echo equipped in their main slot gains **12.00%** Electro DMG Bonus.
+CD: **20s**."
+Cuddle Wuddle,3,Elite,"Transform into Cuddle Wuddle and attack enemies with **4** strikes dealing **46.98%** Physical DMG and **1** strike dealing **125.28%** Physical DMG.
+CD: **20s**."
+Lorelei,4,Overlord,"Transform into Lorelei and attack surrounding enemies, dealing **405.00%** Havoc DMG.
+The Resonator with this Echo equipped in their main slot gains **12.00%** Havoc DMG Bonus and **12.00%** Basic Attack DMG Bonus.
+CD: **25s**."
+Sentry Construct,4,Overlord,"Transform into Sentry Construct and attack enemies in front, dealing **405.00%** Glacio DMG. Each time the Resonator with this Echo casts Resonance Liberation, it charges the Strike Capacitor.
+Once Strike Capacitor is at max level, the Echo Skill cooldown will be reset. Use Echo Skill to transform into Sentry Construct and dive into enemies from the air, dealing **405.00%** Glacio DMG and freezing the target.
+The Resonator with this Echo equipped in their main slot gains **12.00%** Glacio DMG Bonus and **12.00%** Resonance Skill DMG Bonus.
+CD: **25s**."
+Dragon of Dirge,4,Overlord,"Transform into Dragon of Dirge and summon a Grief Rift lasting for **5s**. Periodically deal **36.81%** Fusion DMG to enemies within the area of effect.
+The Resonator with this Echo equipped in the main slot gains **12.00%** Fusion DMG Bonus and **12.00%** Basic Attack DMG Bonus.
+CD: **25s**."
+Hecate,4,Calamity,"Summon **3** twirling Crescent Servants around you. Crescent Servants attack enemies with their spinning blades, dealing **45.59%** Havoc DMG. Triggering a Counterattack with the Echo attacks resets the Crescent Servants' duration.
+The Resonator with this Echo equipped in the main slot has their Coordinated Attack DMG increased by **40.00%**.
+CD: **20s**."
+Golden Junrock,1,Common,"Summon a Golden Junrock that charges forward, dealing **129.60%** Spectro DMG to enemies in its path.
+CD: **8s**"
+Calcified Junrock,1,Common,"Summon a Calcified Junrock that restores HP for nearby Resonators in the team by **2.52%** of their Max HP, up to **5** times.
+CD: **15s**"
+Aero Prism,1,Common,"Summon an Aero Prism to attack enemies, dealing **19.26%** Aero DMG.
+CD: **15s**."
+Rage Against the Statue,3,Elite,"Transform into Rage Against the Statue to attack enemies, dealing **313.20%** Spectro DMG. Hold the Echo Skill to maintain the Echo form and charge towards enemies, dealing **469.80%** Spectro DMG.
+CD: **20s**."
+Hurriclaw,3,Elite,"Transform into Hurriclaw and charge forward, dealing **156.60%** Aero DMG upon hit plus **156.60%** Aero DMG with a sweep attack. Hold the Echo Skill to continue charging forward. Use Echo Skill again while charging to perform a sweep attack.
+CD: **20s**."
+La Guardia,1,Common,"Transform into La Guardia and attack nearby targets, dealing **268.20%** Physical DMG.
+Hold the Echo Skill to maintain the Echo form for a while to slash enemies and cast a ranged attack forward. The slash deals **268.20%** Physical DMG, and the ranged attack deals **17.87%** Physical DMG up to **15** times.
+CD: **15s**."
+Sagittario,1,Common,"Transform into Sagittario to move a certain distance and perform a ranged attack, dealing **268.20%** Spectro DMG.
+Getting attacked while moving in the Sagittario form triggers form triggers a damage avoiding enhanced Dodge Counter, dealing **268.20%** Spectro DMG once and **53.64%** Spectro DMG **5** times.
+CD: **15s**."
+Sacerdos,1,Common,"Summon a Sacerdos to attack enemies, dealing **64.80%** Aero DMG **2** times.
+CD: **8s**."
+Aero Drake,1,Common,"Summon an Aero Drake to attack enemies, dealing **129.60%** Aero DMG.
+CD: **8s**."
+Electro Drake,1,Common,"Summon an Electro Drake to attack enemies, dealing **43.20%** Electro DMG **3** times.
+CD: **8s**."
+Glacio Drake,1,Common,"Summon a Glacio Drake to attack enemies, dealing **25.92%** Glacio DMG **5** times.
+CD: **8s**."
+Capitaneus,3,Elite,"Summon a Capitaneus to jump up and smash enemies, dealing **118.80%** Spectro DMG. This attack generates **4** extra Merciless Judgements, each dealing **59.40%** Spectro DMG.
+The Resonator with this Echo equipped in their main slot gains **12.00%** Spectro DMG Bonus and **12.00%** Heavy Attack DMG Bonus.
+CD: **20s**."
+Fusion Drake,1,Common,"Summon a Fusion Drake to attack enemies, dealing **25.92%** Fusion DMG **3** times.
+CD: **8s**"
+Spectro Drake,1,Common,"Summon a Spectro Drake to attack enemies, dealing **43.20%** Spectro DMG **3** times.
+CD: **8s**"
+Havoc Drake,1,Common,"Summon a Havoc Drake to attack enemies, dealing **129.60%** Havoc DMG **3** times.
+CD: **8s**"
+Devotee's Flesh,3,Elite,"Summon a Devotee's Flesh to attack enemies, dealing **43.20%** Aero DMG **3** times.
+CD: **8s**"
+Pilgrim's Shell,3,Elite,"Transform into a Pilgrim's Shell to attack nearby enemies, dealing **268.20%** Aero DMG.
+CD: **15s**"
+Kerasaur,3,Elite,"Transform into Kerasaur to leap into the air and slam down, dealing **268.20%** Aero DMG. Shortly after hitting the target, cast Echo Skill again to charge at the target, dealing **268.20%** Aero DMG.
+The Resonator with this Echo equipped in the main slot gains **12.00%** Aero DMG Bonus and **12.00%** Resonance Liberation DMG Bonus.
+CD: **15s**"
+Lioness of Glory,4,Overlord,"Summon the Halberd of Glory to crush an area, dealing **82.08%** Fusion DMG to nearby targets, and then blast off after a short delay, dealing **191.52%** Fusion DMG.
+The Resonator with this Echo equipped in the main slot gains **12.00%** Fusion DMG Bonus and **12.00%** Resonance Liberation DMG Bonus.
+CD: **20s**"
+Corrosaurus,3,Elite,"Summon a Corrosaurus to attack enemies, dealing **273.60%** Fusion DMG.
+The Resonator with this Echo equipped in the main slot gains **12.00%** Fusion DMG Bonus and **20.00%** Echo Skill DMG Bonus.
+CD: **20s**"
+The False Sovereign,4,Overlord,"Transform into the False Sovereign and dash forward in a spinning strike, dealing **55.35%** Electro DMG **4** times.
+The Resonator with this Echo equipped in the main slot gains **12.00%** Electro DMG Bonus and **12.00%** Heavy Attack DMG Bonus. Upon casting Intro Skill, the False Sovereign is also summoned to deal **405.00%** Electro DMG.
+Start with **2** charges. Gain **1** charge every **8s**, up to **2** charges.
+CD: **8s**"
+Lady of the Sea,4,Overlord,"Summon a Tidestorm to deal **13.68%** Aero DMG ten times and **164.16%** Aero DMG one time to enemies.
+The Resonator with this Echo equipped in the main slot gains **12.00%** Aero DMG Bonus and **12.00%** Resonance Liberation DMG Bonus.
+CD: **20s**"
+Tremor Warrior,1,Common,"Transform into a Tremor Warrior and viciously attack enemies in the front, dealing **205.20%** Electro DMG."
+Flora Drone,1,Common,"Summon a Flora Drone, dealing **64.80%** Aero DMG to enemies and healing Resonators within range by **3.60%** of their Max HP plus an additional **160** HP."
+Mining Drone,1,Common,"Transform into a Mining Drone to attack enemies, dealing **102.60%** Havoc DMG twice.
+CD: **8s**."
+Geospider S4,1,Common,"Summon a Geospider S4 to attack enemies, dealing **51.84%** Spectro DMG once and **77.76%** Spectro DMG once."
+Zip Zap,1,Common,"Summon a Zip Zap to launch spinning attacks at enemies, dealing **25.92%** Electro DMG **5** times."
+Twin Nova: Nebulous Cannon,3,Elite,"Transform into a Twin Nova: Nebulous Cannon to slash enemies twice, with each attack dealing **80.51%** Spectro DMG.
+
+The Resonator with this Echo equipped in the main slot gains **12.00%** Spectro DMG Bonus and **12.00%** Basic Attack DMG Bonus."
+Twin Nova: Collapsar Blade,3,Elite,"Transform into a Twin Nova: Collapsar Blade to rapidly fire at enemies for **5s**, with each attack dealing **2.01%** Electro DMG.
+
+The Resonator with this Echo equipped in the main slot gains **12.00%** Electro DMG Bonus and **12.00%** Basic Attack DMG Bonus."
+Flora Reindeer,3,Elite,"Summon a Flora Reindeer to attack enemies within a large range, dealing **192.60%** Aero DMG."
+Mining Reindeer,3,Elite,"Summon a Mining Reindeer to launch a charged attack at enemies, dealing **237.60%** Electro DMG."
+Ironhoof,3,Elite,"Transform into an Ironhoof to charge at enemies, dealing **53.64%** Fusion DMG. At the end of the charge, unleash a goring attack that deals **13.41%** Fusion DMG **3** times and **174.33%** Fusion DMG once."
+Spacetrek Explorer,3,Elite,Summon a Spacetrek Explorer to grant nearby active Resonators in the team a Shield equal to **10%** of the summoner's Max HP for **4s**.
+Sabercat Reaver,3,Elite,"Summon a Sabercat Reaver to attack enemies, dealing **192.60%** Fusion DMG."
+Sabercat Prowler,3,Elite,"Summon a Sabercat Prowler to fire beams at enemies, dealing **192.60%** Havoc DMG."
+Frostbite Coleoid,3,Elite,"Summon a Frostbite Coleoid to punch enemies, dealing **192.60%** Glacio DMG."
+Windlash Coleoid,3,Elite,"Transform into a Windlash Coleoid to kick enemies, dealing **268.20%** Aero DMG."
+Hyvatia,4,Overlord,"Summon Hyvatia to fire lasers at enemies from mid-air, dealing **27.36%** Spectro DMG **10** times.
+
+Casting Outro Skill within **15s** after summoning Hyvatia grants **10.00%** All-Attribute DMG Bonus to the next Resonator using Intro Skill for **15s**."
+Reactor Husk,4,Overlord,"Transform into a Reactor Husk, jumping into the air and unleashing a heavy slash that deals **351.00%** Fusion DMG to enemies.
+
+The Resonator with this Echo equipped in their main slot gain **10.00%** Energy Regen."
+Sigillum,4,Calamity,"Summon Sigillum to unleash two attacks, dealing **68.40%** and **205.20%** Fusion DMG respectively.
+When equipped in the main slot by Aemeath, it grants **25.00%** Resonance Liberation DMG Bonus.
+CD: **20s**"
+Nameless Explorer,4,Overlord,"Summon Nameless Explorer to attack enemies along its path, dealing **273.60%** Aero DMG.
+The Resonator with this Echo equipped in their main slot gains **12.00%** Aero DMG Bonus and **20.00%** Echo Skill DMG Bonus.
+CD: **20s**."
+Kronablight,3,Elite,"Transform into a Kronablight, soar into the air, and dive to deal **268.20%** Electro DMG to the enemies.
+CD: **15s**"
+Glommoth,3,Elite,"Summon a Glommoth to stomp enemies, dealing **273.60%** Glacio DMG.
+Casting Outro Skill within **15s** after summoning Glommoth grants **12.00%** Glacio DMG Bonus to the incoming Resonator for **15s**.
+CD: **20s**."
+Iceglint Dancer,1,Common,"Transform into an Iceglint Dancer to attack enemies, dealing **205.20%** Glacio DMG.
+CD: **8s**."
+Shadow Stepper,1,Common,"Summon a Shadow Stepper to attack enemies, dealing **129.60%** Havoc DMG.
+CD: **8s**."
+Voidwing Moth,3,Elite,"Press Echo Skill to transform into Voidwing Moth, dealing **405.00%** Spectro DMG to nearby enemies.
+Hold Echo Skill to continuously attack, dealing up to **12** instances of **49.33%** Spectro DMG.
+Within **15s** after using this Echo skill, casting Outro Skill increases the incoming Resonator's ATK by **12.00%** for **15s**.
+CD: **25s**"
+Smiter,1,Common,"Use Echo Skill to summon a Smiter to jab at enemies, dealing **7** instances of **19.26%** Spectro DMG, and finish with an uppercut, dealing **57.78%** Spectro DMG."
+Porcelain Picket,1,Common,"Use Echo Skill to summon a Porcelain Picket to slash forward, dealing **2** instances of **19.44%** Aero DMG and **7** instances of **12.96%** Aero DMG to enemies along the path."
+Stone Picket,1,Common,"Use Echo Skill to summon a Stone Picket, dealing **129.60%** Aero DMG."
+Aureate Picket,3,Elite,"Use Echo Skill to transform into an Aureate Picket, immediately recover **0.55%** HP times plus an additional instance of **24** points of HP, then bash into enemies and deal **153.90%** Aero DMG."
+Kernel Puppet: Joy,3,Elite,"Use Echo Skill to summon Kernel Puppet: Joy to attack enemies, dealing **129.60%** Physical DMG."
+Kernel Puppet: Anger,3,Elite,"Use Echo Skill to summon Kernel Puppet: Worry to attack enemies, dealing **129.60%** Fusion DMG."
+Kernel Puppet: Worry,3,Elite,"Use Echo Skill to summon Kernel Puppet: Worry to attack enemies, dealing **64.80%** Glacio DMG."
+Kernel Puppet: Reflection,3,Elite,"Use Echo Skill to summon Kernel Puppet: Reflection to attack enemies, dealing **64.80%** Electro DMG."
+Kernel Puppet: Grief,1,Common,"Use Echo Skill to summon Kernel Puppet: Grief to attack enemies, dealing **129.60%** Spectro DMG."
+Kernel Puppet: Fright,1,Common,"Use Echo Skill to summon Kernel Puppet: Fright to attack enemies, dealing an instance of **51.84%** Havoc DMG and an instance of **77.76%** Havoc DMG."
+Smolder,1,Common,"Use Echo Skill to summon Smolder to hurl fireballs toward enemies, dealing **192.60%** Fusion DMG. If the fireball hits the ground, it explodes to deal **192.60%** Fusion DMG to all enemies within the range."
+Fog Lionarch,3,Elite,"Use Echo Skill to summon Fog Lionarch to spit fire toward enemies, dealing **7** stages of **33.93%** Fusion DMG."
+Forbidden Bastion,3,Elite,"Use Echo Skill to summon Forbidden Bastion to bash over enemies, dealing **237.60%** Glacio DMG.
+
+Resonators with this Echo equipped in the main slot gain **10.00%** Healing Bonus."
+Myriad Snare: Rustfire Chassis,4,Overlord,"Summon Myriad Snare: Rustfire Chassis, dealing Fusion DMG equal to **10.20%** of the Max HP on initial impact. During its duration, it repeatedly crushes enemies along its path up to **19** times, dealing Fusion DMG equal to **0.37%** of the Max HP each time.
+
+Resonators with this Echo equipped in the main slot gain **12.00%** Fusion DMG Bonus and **12.00%** Heavy Attack DMG Bonus."
+Thousand-Puppet Pavilion,4,Calamity,"Use Echo Skill to attack nearby enemies, dealing **109.44%** Havoc DMG and summoning **4** Blades of Thousand Memories that last **15s**.
+
+While Blades of Thousand Memories last, when the Resonator inflicts Havoc Bane, consume **1** Blade of Thousand Memories to deal **41.04%** Havoc DMG once to the target. This effect can be triggered once every **1s**.
+
+Resonators with this Echo equipped in the main slot gain **12.00%** Havoc DMG and **12.00%** Heavy Attack DMG bonuses."
+Jade Nether Serpent,1,Common,"Summon a Jade Nether Serpent that bombards the target with fireballs, dealing **12.96%** Fusion DMG **5** times, then **64.80%** Fusion DMG once.
+CD: **8s**"
+Skywatch Lancer,3,Elite,"Summon a Skywatch Lancer to attack the target, dealing **32.09%** Aero DMG **6** times.
+CD: **15s**"
+Calamity Effigy,4,Calamity,"Transform into Calamity Effigy to deal **405.00%** Aero DMG.
+The Resonator with this Echo equipped in the main slot gains **10.00%** Aero DMG Bonus, and additionally gains **10.00%** Aero DMG Bonus for **15s** when inflicting Tune Strain - Shifting on the target.
+CD: **25s**"
+Bloomburst Puppet,1,Common,"Summon a Bloomburst Puppet to startle the target, dealing **1** instance of **25.92%** Glacio DMG, followed by **2** instances of **12.96%** Glacio DMG and **1** instance of **77.76%** Glacio DMG.
+CD: **8s**"
+Formrender,3,Elite,"Use Echo Skill to summon a Formrender, dealing **273.60%** Fusion DMG.
+The Resonator with this Echo equipped in the main slot gains **10.00%** Energy Regen.
+CD: **20s**"
+Soulfrayer,3,Elite,"Use Echo Skill to summon a Soulfrayer, dealing **91.18%** Electro DMG **3** times.
+Casting Outro Skill within **15s** after summoning Soulfrayer grants **12.00%** Electro DMG Bonus to the incoming Resonator for **15s**.
+CD: **20s**"
+Baby Viridblaze Saurian,1,Common,"Transform into Baby Viridblaze Saurian to rest in place, and slowly restore HP."
+Baby Roseshroom,1,Common,"Summon a Baby Roseshroom that fires a laser, dealing **32.00%**+**64** Havoc DMG."
+Fusion Dreadmane,3,Elite,"Summon a Fusion Dreadmane that fiercely strikes the enemy, dealing **32.00%**+**64** Fusion DMG."
+Viridblaze Saurian,3,Elite,"Summon a Viridblaze Saurian to continuously spit fire, dealing **17.12%** Fusion DMG **10** times."
+Thundering Mephis,4,Overlord,"Transform into Thundering Mephis, engaging in a rapid assault of up to **6** strikes. The first **5** strikes deal **132.61%** Electro DMG each, while the final strike inflicts **189.44%** Electro DMG, with an additional **31.57%** Electro DMG from the thunder.
+
+After the final hit, increase the current character's Electro DMG by **12.00%** and Resonance Liberation DMG by **12.00%** for **15s**."

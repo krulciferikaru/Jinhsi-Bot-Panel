@@ -1,0 +1,95 @@
+name,cost,class,description
+Tempest Mephis,4,Overlord,"Transform into Tempest Mephis to perform tail swing attacks followed by a claw attack. The lightning strike summoned by the tail swing deals **102.48%** Electro DMG each time, while the claw attack deals **175.68%** Electro DMG.
+
+After the claw hit, increase the current character's Electro DMG by **12.00%** and Heavy Attack DMG by **12.00%** for **15s**."
+Chop Chop: Headless,1,Common,"Summon a Chop Chop: Headless to attack enemies, dealing **129.60%** Fusion DMG.
+CD: **8s**."
+Chop Chop: Leftless,1,Common,"Summon a Chop Chop: Leftless to attack enemies, dealing **129.60%** Spectro DMG.
+CD: **8s**."
+Chop Chop: Rightless,1,Common,"Summon a Chop Chop: Rightless to attack enemies, dealing **129.60%** Havoc DMG.
+CD: **8s**."
+Nightmare: Feilian Beringal,4,Overlord,"Summon a Nightmare: Feilian Beringal to attack enemies, dealing **164.16%** Aero DMG. The remaining Whirlwind Beam will continuously attack surrounding enemies up to **5** times, each dealing **21.89%** Aero DMG.
+The Resonator with this Echo equipped in their main slot gains **12.00%** Aero DMG Bonus and **12.00%** Heavy Attack DMG Bonus.
+CD: **20s**."
+Nightmare: Impermanence Heron,4,Overlord,"Transform into Nightmare: Impermanence Heron and deliver up to **10** consecutive strikes to surrounding enemies, each dealing **40.50%** Havoc DMG.
+The Resonator with this Echo equipped in their main slot gains **12.00%** Havoc DMG Bonus and **12.00%** Heavy Attack DMG Bonus.
+CD: **25s**."
+Nightmare: Thundering Mephis,4,Overlord,"Transform into Nightmare: Thundering Mephis and attack enemies in front, dealing **405.00%** Electro DMG.
+The Resonator with this Echo equipped in their main slot gains **12.00%** Electro DMG Bonus and **12.00%** Resonance Liberation DMG Bonus.
+CD: **25s**."
+Nightmare: Tempest Mephis,4,Overlord,"Transform into Nightmare: Tempest Mephis and attack surrounding enemies, dealing **405.00%** Electro DMG.
+The Resonator with this Echo equipped in their main slot gains **12.00%** Electro DMG Bonus and **12.00%** Resonance Skill DMG Bonus.
+CD: **25s**."
+Nightmare: Crownless,4,Overlord,"Transform into Nightmare: Crownless and attack enemies in front, dealing **264.60%** Havoc DMG. The Resonator with this Echo equipped in their main slot gains **12.00%** Havoc DMG Bonus and **12.00%** Basic Attack DMG Bonus.
+This skill has **3** initial charges, replenished once every **12s**, max **3** charges. When Nightmare: Crownless hits a target, DMG dealt by this skill is increased by **20.00%**. This effect lasts for **2s** and does not stack.
+CD: **12s**."
+Nightmare: Inferno Rider,4,Overlord,"Transform into Nightmare: Inferno Rider and jump to attack enemies in front, dealing **405.00%** Fusion DMG.
+The Resonator with this Echo equipped in their main slot gains **12.00%** Fusion DMG Bonus and **12.00%** Resonance Skill DMG Bonus.
+Hold Echo Skill to transform into Nightmare: Inferno Rider and enter Riding Mode. When exiting Riding Mode, deal **283.50%** Fusion DMG to enemies in front.
+CD: **25s**."
+Nightmare: Mourning Aix,4,Overlord,"Summon a Nightmare: Mourning Aix to attack surrounding enemies, dealing **273.60%** Spectro DMG. DMG dealt to enemies inflicted by Spectro Frazzle is increased by **100.00%**.
+The Resonator with this Echo equipped in their main slot gains **12.00%** Spectro DMG Bonus.
+CD: **20s**."
+Nightmare: Lampylumen Myriad,4,Overlord,"Summon Nightmare: Lampylumen Myriad and attack surrounding enemies, dealing **273.60%** Glacio DMG.
+The Resonator with this Echo equipped in their main slot gains **12.00%** Glacio DMG Bonus and deals **30.00%** more Coordinated Attack DMG.
+CD: **20s**."
+Reminiscence: Fleurdelys,4,Calamity,"Summon Windcleaver and attack the target, dealing **27.36%** Aero DMG **8** times and **136.80%** Aero DMG once.
+The Resonator with this Echo equipped in the main slot gains **10.00%** Aero DMG Bonus. When Resonator: Aero or Cartethyia equips this Echo, they gain **10.00%** more Aero DMG Bonus.
+CD: **20s**."
+Nightmare: Kelpie,4,Overlord,"Transform into Nightmare: Kelpie to attack nearby targets, dealing **405.00%** Glacio DMG.
+The Resonator with this Echo equipped in the main slot gains **12.00%** Glacio DMG Bonus and **12.00%** Aero DMG Bonus. Switching out the Resonator with Outro Skill summons Nightmare: Kelpie to deal **405.00%** Aero DMG.
+CD: **25s**"
+Nightmare: Hecate,4,Calamity,"Transform into Nightmare: Hecate. Leap up and smash down, dealing **3** stages of damage, each dealing Havoc DMG equal to **152.39%** of her ATK.
+The Resonator with the Echo equipped in the main slot gains **12.00%** Havoc DMG Bonus and **20.00%** Echo Skill DMG Bonus.
+CD: **25s**"
+Reminiscence: Fenrico,4,Overlord,"Summon the Talons of Decree to attack nearby enemies, dealing **273.60%** Aero DMG.
+The Resonator with this Echo equipped in their main slot gains **12.00%** Aero DMG Bonus and **12.00%** Heavy Attack DMG Bonus.
+CD: **20s**."
+Nightmare: Havoc Warrior,1,Common,"Transform into Havoc Warrior to attack up to **3** times, dealing **171.73%** Havoc DMG each time."
+Nightmare: Glacio Predator,1,Common,"Summon a Glacio Predator that throws an ice spear, dealing **46.08%** Glacio DMG on hit. Deal **4.61%** Glacio DMG up to **10** times during the charging time, and **23.04%** Glacio DMG when the spear explodes."
+Nightmare: Tambourinist,3,Elite,"Summon a Tambourinist that plays out Melodies of Annihilation. Any Resonator on the team gains the following effect for **10s** upon obtaining a Melody of Annihilation: When the Resonator hits a target, the Tambourinist deals **14.40%** Havoc DMG to the target, up to **10** times."
+Nightmare: Violet-Feathered Heron,3,Elite,"Transform into Violet-Feathered Heron and enter a Parry Stance. Counterattack when the Parry stance is over, dealing **288.00%** Electro DMG. If attacked during Parry Stance, you can counterattack in advance and additionally recover **5** Concerto Energy."
+Nightmare: Cyan-Feathered Heron,3,Elite,"Transform into Cyan-Feathered Heron and charge at the enemies, dealing **236.80%** Aero DMG; This Echo Skill interrupts enemy Special Skills upon dealing damage."
+Nightmare: Electro Predator,1,Common,"Summon an Electro Predator to shoot the enemy **5** times. The first **4** shots deals **17.28%** Electro DMG, and the last deals **46.08%** Electro DMG."
+Nightmare: Aero Predator,1,Common,"Summon an Aero Predator that throws a dart forward. The dart will bounce between enemies up to three times, dealing **28.80%** Aero DMG each time it hits."
+Nightmare: Gulpuff,1,Common,"Summon a Gulpuff that blows bubbles **5** times, each time dealing **23.04%** Glacio DMG."
+Nightmare: Chirpuff,1,Common,Summon a Chirpuff that self-inflates and blasts a powerful gust of wind forward **3** times. Each blast inflicts **38.40%** Aero DMG and pushes enemies backwards.
+Reminiscence: Threnodian - Leviathan,4,Calamity,"Summon a Collapsing Horizon, dealing two instances of **131.04%** Havoc DMG to the nearby enemies and obtaining the Core of Collapse for **15s**.
+
+While it lasts, Core of Collapse deals **24.57%** Havoc DMG when the active Resonator in the team deals damage. This effect can be triggered once every **0.5s**, up to **8** time. Enemies with Havoc Bane take **100%** more DMG from this effect.
+
+The Resonator with this Echo equipped in the main slot gains **12.00%** Havoc DMG Bonus and **12.00%** Resonance Liberation DMG Bonus."
+Nightmare: Viridblaze Saurian,3,Elite,"Summon a Viridblaze Saurian to continuously spit fire, dealing **17.12%** Fusion DMG **10** times."
+Nightmare: Baby Viridblaze Saurian,1,Common,"Transform into Baby Viridblaze Saurian to rest in place, and slowly restore HP."
+Nightmare: Baby Roseshroom,1,Common,"Summon a Baby Roseshroom that fires a laser, dealing **32.00%**+**64** Havoc DMG."
+Nightmare: Tick Tack,1,Common,"Summon a Tick Tack that charges and bites the enemy. The charge from Tick Tack will deal **68.48%** Havoc DMG to the enemy, and the bite will deal **102.72%** Havoc DMG to the enemy. Reduces enemy Vibration Strength by up to **5.00%** during **5s**."
+Nightmare: Dwarf Cassowary,1,Common,"Summon a Dwarf Cassowary that tracks and attacks the enemy, dealing **38.40%** Physical DMG **3** time(s).
+
+Cooldown: **8s**"
+Nightmare: Roseshroom,3,Elite,"Summon a Roseshroom that fires a laser, dealing **57.07%** Havoc DMG up to **3** times."
+Reminiscence: Kronaclaw,3,Elite,"Transform into a Kronaclaw and soar into the air to deal **8.04%** Aero DMG up to **8** times and **24.13%** Aero DMG **2** times, then dive to deal **155.55%** Aero DMG **1** time.
+CD: **15s**"
+Reminiscence: Threnodian - Voidborne Construct,4,Calamity,"Summon Aleph-**1**'s Creation to deal **21.88%** Glacio DMG **5** times and **164.16%** Glacio DMG **1** time to enemies.
+The Resonator with this Echo equipped in the main slot gains **12.00%** Glacio DMG Bonus and **12.00%** Resonance Liberation DMG Bonus.
+CD: **20s**"
+Reminiscence: Denia,4,Calamity,"Summon ""Trickster"" to deal **273.60%** Fusion DMG to enemies. Within the next **15s**, casting Outro Skill grants the incoming Resonator **12.00%** Fusion DMG Bonus for **15s**.
+CD: **20s**"
+Reminiscence - Nightmare: Adam Smasher,4,Overlord,"Cast Echo Skill to deal **16** instances of Physical DMG equal to **10.26%** of ATK to enemies within range.
+When Lucy or Rebecca has this Echo equipped in the main slot, their Crit. Rate is increased by **15%** and they unlock special Echo Skills.
+
+If equipped by Lucy:
+- Press the Echo Skill button to deal Spectro DMG equal to **273.60%** of ATK to nearby enemies.
+- Hold the Echo Skill button to deal Spectro DMG equal to **273.60%** of ATK to nearby enemies and enter a special moving state, increasing Lucy's movement speed while slowing nearby enemies.
+
+If equipped by Rebecca:
+- Cast Echo Skill to fire missiles, dealing **16** instances of Electro DMG equal to **17.10%** of ATK to enemies.
+CD: **20s**"
+Fog Lionarch: Body,1,Common,"Use Echo Skill to summon Fog Lionarch: Body to ram into enemies, dealing **192.60%** Fusion DMG."
+Fog Lionarch: Head,1,Common,"Use Echo Skill to summon Fog Lionarch: Head to dart toward enemies, dealing **129.60%** Fusion DMG."
+Reminiscence: Suhsin the Inevitable,4,Calamity,"Cast Echo Skill to deal **4** instances of **27.36%** Electro DMG and **1** instance of **164.16%** Electro DMG.
+When equipped by Hsin, the Echo Skill instead deals **5** instances of **8.20%** Electro DMG and **1** instance of **232.56%** Electro DMG to targets within a larger range.
+The Resonator with this Echo equipped in their main slot gains **10.00%** Electro DMG Bonus. Inflicting Electro Flare, gaining Unison, or triggering Unison Response grants the Resonator an extra **10.00%** Electro DMG Bonus for **30s**.
+CD: **20s**"
+Thundering Mephis,4,Overlord,"Transform into Thundering Mephis, engaging in a rapid assault of up to **6** strikes. The first **5** strikes deal **132.61%** Electro DMG each, while the final strike inflicts **189.44%** Electro DMG, with an additional **31.57%** Electro DMG from the thunder.
+
+After the final hit, increase the current character's Electro DMG by **12.00%** and Resonance Liberation DMG by **12.00%** for **15s**."
