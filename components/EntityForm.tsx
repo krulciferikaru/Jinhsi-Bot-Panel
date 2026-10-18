@@ -50,7 +50,7 @@ function TagsInput({ id, value, onChange, suggestions }: { id: string; value: st
       )}
       <div className="flex items-stretch gap-3">
         <input id={id} className="input input-bordered min-w-0 flex-1" value={text}
-          onChange={(e) => setText(e.target.value)} placeholder="Type and press Enter"
+          onChange={(e) => setText(e.target.value)} placeholder="Type and press Enter…" autoComplete="off" spellCheck={false}
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); add(); } }} />
         <button type="button" className="btn h-auto min-h-11 shrink-0 px-7" disabled={!text.trim()} onClick={add}>Add</button>
       </div>
@@ -345,7 +345,7 @@ function FieldInput({ f, value, onChange, name, setOther, lookups }: { f: Field;
         control = <Combobox id={id} value={shown} options={shown && !opts.includes(shown) ? [shown, ...opts] : opts} onChange={onChange} iconFor={pick} placeholder="Choose…" clearLabel={f.required ? undefined : "None"} aria-describedby={described} />;
         break;
       }
-      control = <input id={id} type={f.type === 'number' ? 'number' : 'text'} className="input input-bordered w-full" value={value} required={f.required}
+      control = <input id={id} type={f.type === 'number' ? 'number' : 'text'} className="input input-bordered w-full" value={value} required={f.required} autoComplete="off" spellCheck={f.key.includes('url') || f.key.includes('emoji') ? false : undefined}
         placeholder={f.placeholder} aria-describedby={described} onChange={(e) => onChange(e.target.value)} />;
   }
   return (

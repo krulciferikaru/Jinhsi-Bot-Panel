@@ -120,7 +120,7 @@ export function BotPanel() {
             </form>
           </div>
         </div>
-        <form method="dialog" className="modal-backdrop"><button aria-label="Close dialog">close</button></form>
+        <form method="dialog" className="modal-backdrop"><button tabIndex={-1} aria-label="Close dialog">close</button></form>
       </dialog>
     </div>
   );

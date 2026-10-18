@@ -40,7 +40,7 @@ export function Modal({ title, open, onClose, children, wide }: { title: string;
         <h2 id={tid} className="mb-4 text-xl font-bold">{title}</h2>
         {open && children}
       </div>
-      <form method="dialog" className="modal-backdrop"><button aria-label="Close dialog">close</button></form>
+      <form method="dialog" className="modal-backdrop"><button tabIndex={-1} aria-label="Close dialog">close</button></form>
     </dialog>
   );
 }
@@ -167,12 +167,33 @@ export function Manager({ collection }: { collection: CollectionKey }) {
 
   // Deep links from the Health page: ?q=<search> and ?edit=<record id>
   const pendingEdit = useRef<string | null>(null);
+  const urlReady = useRef(false);
   useEffect(() => {
     const sp = new URLSearchParams(window.location.search);
     const search = sp.get('q');
     if (search) setQ(search);
+    if (sp.get('tab') === 'archived') setTab('archived');
+    const p = Number(sp.get('page'));
+    if (Number.isInteger(p) && p > 1) setPage(p);
+    const fromUrl: Record<string, string> = {};
+    for (const f of cfg.filters ?? []) { const v = sp.get(`f.${f.key}`); if (v) fromUrl[f.key] = v; }
+    if (Object.keys(fromUrl).length) setFilters(fromUrl);
     pendingEdit.current = sp.get('edit');
+    urlReady.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  // Keep the address bar in step with the list (without adding history entries).
+  useEffect(() => {
+    if (!urlReady.current) return;
+    const sp = new URLSearchParams();
+    if (q.trim()) sp.set('q', q.trim());
+    if (tab === 'archived') sp.set('tab', 'archived');
+    if (page > 1) sp.set('page', String(page));
+    for (const [k, v] of Object.entries(filters)) if (v) sp.set(`f.${k}`, v);
+    const qs = sp.toString();
+    const next = window.location.pathname + (qs ? `?${qs}` : '');
+    if (next !== window.location.pathname + window.location.search) window.history.replaceState(null, '', next);
+  }, [q, tab, page, filters]);
   useEffect(() => {
     if (!rows || !pendingEdit.current) return;
     const d = rows.find((r) => String(r._id) === pendingEdit.current);
