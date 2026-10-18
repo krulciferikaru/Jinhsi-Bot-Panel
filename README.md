@@ -38,13 +38,13 @@ A web panel and Discord bot for **Wuthering Waves** game data. It replaces hand-
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/krulciferikaru/Jinhsi-Bot.git
+   git clone https://github.com/krulciferikaru/Jinhsi-Bot-Panel.git
    ```
 
 2. Navigate to the directory:
 
    ```bash
-   cd Jinhsi-Bot
+   cd Jinhsi-Bot-Panel
    ```
 
 3. Install dependencies:
@@ -108,7 +108,7 @@ The script only reads the production database and only writes to the development
 
 ### Letting other servers add the bot
 
-The panel does not include a public page. The "Add to Discord" page is a separate project, **Jinhsi Bot Invite**, which has no database and no secrets and can be hosted publicly (for example on Vercel). The bot itself must run somewhere that stays online for other servers to use it.
+The panel does not include a public page. The "Add to Discord" page is a separate project, **Jinhsi Bot** (repository `Jinhsi-Bot`).
 
 ## Usage Examples
 
