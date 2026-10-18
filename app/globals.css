@@ -266,3 +266,39 @@ html { scroll-padding-top: 5rem; }
 @media (max-width: 1279px) {
   .pill-nav a { padding: 0.4rem 0.65rem; font-size: 0.8rem; }
 }
+
+
+/* ---------- Accessibility and touch (from the Web Interface Guidelines and WCAG 2.2) ---------- */
+
+/* One visible keyboard focus ring everywhere, in the accent colour. Mouse clicks do not show it. */
+:where(a, button, summary, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 2px;
+}
+/* Pill-shaped radio and checkbox choices: the whole pill shows the focus ring when its input has focus. */
+label:has(> input:focus-visible) {
+  outline: 2px solid var(--lime);
+  outline-offset: 2px;
+}
+label:has(> input:focus-visible) > input:focus-visible { outline: none; }
+
+/* Numbers line up in counts, tables and pagination. */
+body { font-variant-numeric: tabular-nums; }
+
+/* Headings do not end on a single word; paragraphs avoid orphans. */
+h1, h2, h3, .card-title { text-wrap: balance; }
+p { text-wrap: pretty; }
+
+/* A scrolling dialog does not scroll the page behind it. */
+.modal-box { overscroll-behavior: contain; }
+
+/* No double-tap zoom delay on controls; a subtle tap highlight instead of the browser default. */
+:where(a, button, label, summary, [role="tab"], [role="option"]) { touch-action: manipulation; }
+html { -webkit-tap-highlight-color: rgba(255, 217, 59, 0.15); }
+
+/* Finger-sized targets on touch screens (44 px). */
+@media (pointer: coarse) {
+  .btn, .btn-sm, .btn-xs, .tab, .select-trigger, .combo-option { min-height: 2.75rem; }
+  .btn-square, .btn-circle { min-width: 2.75rem; }
+  .badge button { min-height: 2rem; min-width: 2rem; }
+}

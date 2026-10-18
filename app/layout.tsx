@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import Link from 'next/link';
 import { JetBrains_Mono, Space_Grotesk } from 'next/font/google';
 import './globals.css';
@@ -10,6 +10,8 @@ import { StickyHeader } from '@/components/StickyHeader';
 
 const grotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-grotesk', weight: ['300', '400', '500', '600', '700'] });
 const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains', weight: ['400', '500'] });
+
+export const viewport: Viewport = { themeColor: '#0d0b08', colorScheme: 'dark' };
 
 export const metadata: Metadata = {
   title: 'Jinhsi Bot Panel',
