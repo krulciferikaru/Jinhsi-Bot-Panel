@@ -57,7 +57,7 @@ export default async function Home() {
             <Link href="/health" className="card card-border h-full bg-base-100 transition hover:border-primary focus-visible:outline">
               <div className="card-body gap-1">
                 <h3 className="card-title">Health</h3>
-                <p className="text-sm text-base-content/70">Missing icons, empty details and records the bot can't answer well.</p>
+                <p className="text-sm text-base-content/70">Missing and broken data.</p>
                 <p className="mt-2 text-sm">
                   {health ? (
                     <>

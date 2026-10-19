@@ -1,7 +1,8 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
-import { docIcon, getPath, plain, type Doc } from '@/lib/schema';
+import { docIcon, getPath, plain, statLabel, type Doc } from '@/lib/schema';
 import { Icon } from './Icon';
+import { StarIcon } from './Icons';
 import { ChoiceIcon, useChoiceIcons } from './ChoiceIcon';
 
 const arr = (v: unknown): string[] => (Array.isArray(v) ? v.map(String) : v ? [String(v)] : []);
@@ -13,7 +14,7 @@ export const splitRank = (s: string) => {
 };
 
 /** **bold** from Discord markdown, for passive text. */
-function Rich({ text }: { text: string }) {
+export function Rich({ text }: { text: string }) {
   return (
     <>
       {text.split(/(\*\*[^*]+\*\*)/g).map((p, i) => (/^\*\*[^*]+\*\*$/.test(p) ? <strong key={i}>{p.slice(2, -2)}</strong> : <span key={i}>{p}</span>))}
@@ -21,15 +22,33 @@ function Rich({ text }: { text: string }) {
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+/**
+ * A small link to the same resonator, echo or type on another page. The lists read ?q= and ?f.<filter>= from the address,
+ * and a plain link (a full page load) makes them re-read it, even when the link goes to the page you are already on.
+ */
+export function Shortcut({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <a href={href} className="group inline-flex items-center gap-1 text-sm font-semibold text-primary underline decoration-primary/50 underline-offset-4 hover:decoration-primary">
+      {children}
+      <svg aria-hidden="true" viewBox="0 0 16 16" className="h-3.5 w-3.5 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4.5 11.5l7-7M5.5 4.5h6v6" /></svg>
+    </a>
+  );
+}
+export const q = (name: unknown) => `?q=${encodeURIComponent(String(name ?? ''))}`;
+export const filterLink = (page: string, key: string, value: unknown) => `/${page}?f.${key}=${encodeURIComponent(String(value ?? ''))}`;
+
+export function Section({ title, children, action }: { title: string; children: React.ReactNode; action?: React.ReactNode }) {
   return (
     <section className="space-y-2">
-      <h3 className="text-sm font-semibold tracking-tight text-primary">{title}</h3>
+      <div className="flex items-baseline justify-between gap-3">
+        <h3 className="text-sm font-semibold tracking-tight text-primary">{title}</h3>
+        {action}
+      </div>
       {children}
     </section>
   );
 }
-const Chips = ({ items, ordered, iconFor }: { items: string[]; ordered?: boolean; iconFor?: (name: string) => string | undefined }) => (
+export const Chips = ({ items, ordered, iconFor }: { items: string[]; ordered?: boolean; iconFor?: (name: string) => string | undefined }) => (
   items.length === 0 ? <p className="text-base-content/60">—</p> : (
     <ul className="flex flex-wrap gap-2">
       {items.map((t, i) => (
@@ -67,12 +86,16 @@ export function BuildGuide({ doc }: { doc: Doc }) {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Icon url={docIcon('builds', doc)} label={String(doc.resonator_id ?? '?')} size={56} />
+        <Icon url={docIcon('builds', doc)} label={String(doc.resonator_id ?? '?')} size={64} />
         <div className="min-w-0">
-          <p className="mono-label">{doc.resonator_id}{doc.role ? ` · ${doc.role}` : ''}</p>
-          <p className="truncate text-xl font-semibold">{doc.build_name}</p>
+          <h3 className="truncate text-xl font-semibold leading-snug">{doc.build_name}</h3>
         </div>
-        {doc.is_primary && <span className="badge badge-primary ml-auto">Primary</span>}
+        {doc.is_primary && <span className="badge badge-sm badge-primary ml-auto font-normal">Primary</span>}
+      </div>
+      <div className="flex flex-wrap gap-x-5 gap-y-1">
+        <Shortcut href={`/resonators${q(doc.resonator_id)}`}>View {String(doc.resonator_id)}</Shortcut>
+        <Shortcut href={`/skills${q(doc.resonator_id)}`}>View {String(doc.resonator_id)} skills</Shortcut>
+        <Shortcut href={`/builds${q(doc.resonator_id)}`}>View more {String(doc.resonator_id)} builds</Shortcut>
       </div>
 
       {weapons.length > 0 && (
@@ -81,7 +104,7 @@ export function BuildGuide({ doc }: { doc: Doc }) {
             {weapons.map((w, i) => (
               <li key={`${w.name}-${i}`} className="flex flex-wrap items-center gap-3 rounded-box border border-white/10 px-3 py-2">
                 <span className="mono-label w-6 text-primary">{i + 1}</span>
-                <span className="font-medium">{w.name}</span>
+                <a href={`/weapons${q(w.name)}`} className="font-medium hover:underline">{w.name}</a>
                 {w.note && <span className="badge badge-sm">{w.note}</span>}
                 {known && !known.has(w.name.toLowerCase()) && <span className="badge badge-warning badge-sm" title="No weapon with this name in your Weapons list">not in your weapons</span>}
               </li>
@@ -108,7 +131,7 @@ export function BuildGuide({ doc }: { doc: Doc }) {
                     <tr key={`${slot}-${i}`}>
                       <td className="font-medium">{slot}</td>
                       <td className="text-base-content/70">{clean(Array.isArray(echoes) ? echoes.join(', ') : echoes)}</td>
-                      <td>{stats.length ? stats.map((x) => plain(x) || x).join(' / ') : '—'}</td>
+                      <td>{stats.length ? <span className="flex flex-wrap gap-x-3 gap-y-1">{stats.map((x) => <span key={x} className="inline-flex items-center gap-1"><ChoiceIcon src={iconFor(plain(x) || x)} />{plain(x) || x}</span>)}</span> : '—'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -142,64 +165,49 @@ export function BuildGuide({ doc }: { doc: Doc }) {
 
 /* --------------------------------- Weapon ---------------------------------- */
 
-type Rec = { resonator: string; build: string; rank: number; note: string; primary: boolean };
-
 export function WeaponGuide({ doc }: { doc: Doc }) {
-  const [builds, setBuilds] = useState<Doc[] | null>(null);
+  const [resonators, setResonators] = useState<Doc[]>([]);
   useEffect(() => {
-    fetch('/api/builds').then((r) => r.json()).then((rows) => Array.isArray(rows) && setBuilds(rows)).catch(() => setBuilds([]));
+    fetch('/api/resonators').then((r) => r.json()).then((rows) => Array.isArray(rows) && setResonators(rows)).catch(() => {});
   }, []);
+  const iconOf = (name: string) => { const r = resonators.find((x) => String(x.name).toLowerCase() === name.toLowerCase()); return r ? docIcon('resonators', r) : undefined; };
+  const signature = plain(doc.signature_for);
+  const recommended = arr(doc.recommended_for);
+  const who = (name: string) => (
+    <li key={name}>
+      <a href={`/resonators${q(name)}`} className="badge badge-lg gap-2 hover:border-primary/60">
+        <ChoiceIcon src={iconOf(name)} />{name}
+      </a>
+    </li>
+  );
 
-  // "Recommended for" is computed from the Builds' weapon lists, so it never needs typing twice.
-  const recs = useMemo<Rec[]>(() => {
-    const me = String(doc.name).toLowerCase();
-    const out: Rec[] = [];
-    for (const b of builds ?? []) {
-      if (b.archived || b.is_current === false) continue;
-      arr(b.weapons).map(splitRank).forEach((w, i) => {
-        if (w.name.toLowerCase() === me) out.push({ resonator: String(b.resonator_id), build: String(b.build_name), rank: i + 1, note: w.note, primary: Boolean(b.is_primary) });
-      });
-    }
-    return out.sort((a, b) => a.rank - b.rank || a.resonator.localeCompare(b.resonator));
-  }, [builds, doc.name]);
-
-  const stats: [string, string][] = [
-    ['Type', String(doc.weapon_type ?? '—')],
-    ['Rarity', doc.rarity ? '★'.repeat(Number(doc.rarity)) : '—'],
+  const stats: [string, React.ReactNode][] = [
+    ['Rarity', doc.rarity ? <>{String(doc.rarity)}<StarIcon className="h-5 w-5 text-primary" /></> : '—'],
     ['Base ATK', clean(getPath(doc, 'base_attack.stats')).replace(/\*\*/g, '')],
-    [String(getPath(doc, 'secondary_stat.title') ?? 'Secondary stat'), clean(getPath(doc, 'secondary_stat.stats')).replace(/\*\*/g, '')],
+    [statLabel(getPath(doc, 'secondary_stat.title'), getPath(doc, 'secondary_stat.stats')) || 'Secondary stat', clean(getPath(doc, 'secondary_stat.stats')).replace(/\*\*/g, '')],
   ];
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Icon url={docIcon('weapons', doc)} label={String(doc.name)} size={56} />
-        <div className="min-w-0"><p className="mono-label">{doc.weapon_type}</p><p className="truncate text-xl font-semibold">{doc.name}</p></div>
+        <Icon url={docIcon('weapons', doc)} label={String(doc.name)} size={64} />
+        <div className="min-w-0"><h3 className="truncate text-xl font-semibold leading-snug">{doc.name}</h3></div>
       </div>
 
       <Section title="Stats">
-        <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {stats.map(([k, v]) => (<div key={k} className="rounded-box border border-white/10 p-3"><dt className="text-xs uppercase text-base-content/60">{k}</dt><dd className="font-semibold">{v}</dd></div>))}
+        <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {stats.map(([k, v]) => (<div key={k} className="rounded-box border border-white/10 p-3"><dt className="text-xs uppercase text-base-content/60">{k}</dt><dd className="flex items-center gap-1.5 font-semibold">{v}</dd></div>))}
         </dl>
       </Section>
 
       <Section title="Passive">{doc.passive ? <p className="whitespace-pre-wrap wrap-break-word"><Rich text={String(doc.passive)} /></p> : <p className="text-base-content/60">—</p>}</Section>
 
-      <Section title="Recommended for">
-        {builds === null ? <p className="text-base-content/60">Checking your builds…</p>
-          : recs.length === 0 ? <p className="text-base-content/60">No build lists this weapon yet. Add it to a build’s “Best weapons” and it will show up here.</p> : (
-            <ul className="space-y-1">
-              {recs.map((r, i) => (
-                <li key={i} className="flex flex-wrap items-center gap-3 rounded-box border border-white/10 px-3 py-2">
-                  <span className="badge badge-primary badge-sm">#{r.rank}</span>
-                  <span className="font-medium">{r.resonator}</span>
-                  <span className="text-sm text-base-content/60">{r.build}</span>
-                  {r.note && <span className="badge badge-sm">{r.note}</span>}
-                </li>
-              ))}
-            </ul>
-          )}
-      </Section>
+      {(signature || recommended.length > 0) && (
+        <Section title="Resonators">
+          {signature && <div><p className="mb-1 text-xs uppercase text-base-content/60">Signature weapon of</p><ul className="flex flex-wrap gap-2">{who(signature)}</ul></div>}
+          {recommended.length > 0 && <div><p className="mb-1 text-xs uppercase text-base-content/60">Recommended for</p><ul className="flex flex-wrap gap-2">{recommended.map(who)}</ul></div>}
+        </Section>
+      )}
 
       {doc.upgrade_materials && <Section title="Upgrade materials"><Text v={doc.upgrade_materials} /></Section>}
       {doc.notes && <Section title="Notes"><Text v={doc.notes} /></Section>}

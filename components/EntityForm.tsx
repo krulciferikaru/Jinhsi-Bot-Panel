@@ -1,4 +1,5 @@
 'use client';
+import { PlusIcon, SaveIcon } from './Icons';
 import { Fragment, useEffect, useId, useRef, useState } from 'react';
 import { getPath, plain, type Field } from '@/lib/schema';
 import { useToast } from './Toast';
@@ -44,7 +45,7 @@ function TagsInput({ id, value, onChange, suggestions }: { id: string; value: st
         <div className="mb-3 flex flex-wrap items-center gap-2" aria-label="Suggestions">
           <span className="mono-label">Suggested</span>
           {suggestions.filter((x) => !value.includes(x)).map((x) => (
-            <button key={x} type="button" className="btn btn-xs rounded-full" onClick={() => onChange([...value, x])}>+ {x}</button>
+            <button key={x} type="button" className="btn btn-xs rounded-full" onClick={() => onChange([...value, x])}><PlusIcon className="h-3 w-3" />{x}</button>
           ))}
         </div>
       )}
@@ -61,7 +62,7 @@ function TagsInput({ id, value, onChange, suggestions }: { id: string; value: st
 type Choice = { label: string; value: string };
 
 /** A short list of single choices: every option visible at once. */
-function RadioGroup({ name, legend, value, options, onChange, required, describedBy }: { name: string; legend: string; value: string; options: string[]; onChange: (v: string) => void; required?: boolean; describedBy?: string }) {
+function RadioGroup({ name, legend, value, options, onChange, required, describedBy, labels }: { name: string; legend: string; value: string; options: string[]; onChange: (v: string) => void; required?: boolean; describedBy?: string; labels?: Record<string, string> }) {
   const iconFor = useChoiceIcons();
   return (
     <div role="radiogroup" aria-label={legend} aria-describedby={describedBy} className="flex flex-wrap gap-2">
@@ -69,7 +70,7 @@ function RadioGroup({ name, legend, value, options, onChange, required, describe
         <label key={o || 'none'} className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm transition ${value === o ? 'border-primary bg-primary/15 font-semibold' : 'border-white/10 bg-white/5 hover:border-white/30'}`}>
           <input type="radio" name={name} className="radio radio-primary radio-sm" checked={value === o} onChange={() => onChange(o)} />
           <ChoiceIcon src={o ? iconFor(o, legend) : undefined} />
-          {o || 'None'}
+          {o ? (labels?.[o] ?? o) : 'None'}
         </label>
       ))}
     </div>
@@ -145,7 +146,7 @@ function SetComposer({ id, value, onChange }: { id: string; value: string; onCha
         </div>
       ))}
       {rows.length < 3 && (
-        <button type="button" className="btn btn-sm" onClick={() => update([...rows, { name: '', n: '2' }])}>+ Add another set</button>
+        <button type="button" className="btn btn-sm" onClick={() => update([...rows, { name: '', n: '2' }])}><PlusIcon />Add another set</button>
       )}
       <p className="text-sm text-base-content/60">Mixed sets: add each part, for example Void Thunder 2 + Lingering Tunes 2 + Shadow of Shattered Dreams 1.</p>
     </div>
@@ -187,6 +188,35 @@ function RefSelect({ id, collection, value, onChange, required }: { id: string; 
   }, [collection]);
   const all = value && !names.includes(value) ? [value, ...names] : names;
   return <Combobox id={id} value={value} options={all} onChange={onChange} iconFor={(o) => icons[o]} placeholder="Choose…" clearLabel={required ? undefined : 'None'} />;
+}
+
+/** Several records from another collection: the chosen ones as removable tags, and a list to add more from. */
+function MultiRef({ id, collection, value, onChange }: { id: string; collection: string; value: string[]; onChange: (v: string[]) => void }) {
+  const [names, setNames] = useState<string[]>([]);
+  const [icons, setIcons] = useState<Record<string, string>>({});
+  useEffect(() => {
+    fetch(`/api/${collection}`).then((r) => r.json()).then((rows) => {
+      if (!Array.isArray(rows)) return;
+      setNames(rows.filter((r: any) => !r.archived).map((r: any) => r.name));
+      setIcons(Object.fromEntries(rows.filter((r: any) => r.icon_url).map((r: any) => [r.name, optimized(String(r.icon_url), 20)])));
+    }).catch(() => {});
+  }, [collection]);
+  const left = names.filter((n) => !value.includes(n));
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-2">
+        {value.map((t) => (
+          <span key={t} className="badge badge-lg max-w-full gap-1">
+            {icons[t] && <ChoiceIcon src={icons[t]} />}
+            <span className="truncate">{t}</span>
+            <button type="button" className="btn btn-ghost btn-xs btn-circle" aria-label={`Remove ${t}`} onClick={() => onChange(value.filter((x) => x !== t))}>✕</button>
+          </span>
+        ))}
+        {value.length === 0 && <span className="text-sm text-base-content/60">None added</span>}
+      </div>
+      <Combobox id={id} value="" options={left} onChange={(v) => v && onChange([...value, v])} iconFor={(o) => icons[o]} placeholder="Add a resonator…" />
+    </div>
+  );
 }
 
 /** Icon URL plus a PNG picker that commits the file to the GitHub asset repository. */
@@ -312,7 +342,7 @@ function FieldInput({ f, value, onChange, name, setOther, lookups }: { f: Field;
         return (
           <fieldset className="form-control">
             <legend className="mb-1 block text-sm font-medium">{f.label}{f.required && <span className="text-error" aria-hidden="true"> *</span>}{f.required && <span className="sr-only"> (required)</span>}</legend>
-            <RadioGroup name={id} legend={f.label} value={value} options={f.options!} required={f.required} onChange={onChange} describedBy={described} />
+            <RadioGroup name={id} legend={f.label} value={value} options={f.options!} required={f.required} onChange={onChange} describedBy={described} labels={f.optionLabels} />
             {f.help && <p id={helpId} className="mt-1 text-sm text-base-content/60">{f.help}</p>}
             {example}
           </fieldset>
@@ -327,6 +357,7 @@ function FieldInput({ f, value, onChange, name, setOther, lookups }: { f: Field;
       control = <ImageField id={id} f={f} value={value} name={name ?? ''} onChange={onChange} onEmoji={f.emojiKey && setOther ? (code) => setOther(f.emojiKey!, code) : undefined} />;
       break;
     case 'tags': {
+      if (f.ref) { control = <MultiRef id={id} collection={f.ref} value={value} onChange={onChange} />; break; }
       const fixed: Choice[] | undefined = f.choices === 'sets' ? SONATA_SETS.map((n) => ({ label: n, value: n })) : f.choices === 'sonata' ? lookups?.sonata : f.assist === 'stats4' || f.assist === 'stats3' || f.assist === 'stats1'
         ? statChoices(f.assist === 'stats4' ? 4 : f.assist === 'stats3' ? 3 : 1, lookups?.element).map((x) => ({ label: x, value: x })) : undefined;
       if (fixed && fixed.length) { control = <CheckGroup id={id} options={fixed} value={value} onChange={onChange} />; break; }
@@ -362,10 +393,14 @@ function FieldInput({ f, value, onChange, name, setOther, lookups }: { f: Field;
   );
 }
 
-export function EntityForm({ fields, initial, submitLabel, busy, onSubmit, onCancel }: {
+export function EntityForm({ fields, initial, submitLabel, busy, onSubmit, onCancel, onDirty }: {
   fields: Field[]; initial?: Values; submitLabel: string; busy?: boolean;
   onSubmit: (v: Values) => void; onCancel: () => void;
+  /** called once, the first time the person changes a field (automatic fill-ins do not count) */
+  onDirty?: () => void;
 }) {
+  const touched = useRef(false);
+  const markDirty = () => { if (!touched.current) { touched.current = true; onDirty?.(); } };
   const [values, setValues] = useState<Values>(() => {
     const v = hydrate(fields, initial);
     // a build saved before the layout was stored: read it once from its echo text, then keep it fixed while editing
@@ -384,7 +419,7 @@ export function EntityForm({ fields, initial, submitLabel, busy, onSubmit, onCan
     if (!wantsSonata) return;
     fetch('/api/emojis').then((r) => r.json()).then((j) => {
       const byName = new Map<string, string>((j.items ?? []).map((e: any) => [String(e.name).toLowerCase(), String(e.code)]));
-      setSonata(SONATA_SETS.map((n) => ({ label: n, value: byName.get((SET_EMOJI_ALIAS[n] ?? n).replace(/[^A-Za-z0-9]/g, '').toLowerCase()) ?? '' })).filter((c) => c.value));
+      setSonata(SONATA_SETS.map((n) => ({ label: n, value: byName.get(n.replace(/[^A-Za-z0-9]/g, '').toLowerCase()) ?? byName.get((SET_EMOJI_ALIAS[n] ?? n).replace(/[^A-Za-z0-9]/g, '').toLowerCase()) ?? '' })).filter((c) => c.value));
     }).catch(() => {});
   }, [wantsSonata]);
   useEffect(() => {
@@ -446,7 +481,7 @@ export function EntityForm({ fields, initial, submitLabel, busy, onSubmit, onCan
     echoAll: [...lists.echoes.filter((e) => !e.archived)].sort((a, b) => Number(usable(b)) - Number(usable(a)) || Number(String(b.cost) === '4') - Number(String(a.cost) === '4') || String(a.name).localeCompare(String(b.name))).map((e) => String(e.name)),
   };
 
-  const set = (patch: Values) => setValues((s) => ({ ...s, ...patch }));
+  const set = (patch: Values) => { markDirty(); setValues((s) => ({ ...s, ...patch })); };
   const isEcho = fields.some((f) => f.key === 'sonata_effects');
   const [looking, setLooking] = useState(false);
   const [lookNote, setLookNote] = useState('');
@@ -503,8 +538,8 @@ export function EntityForm({ fields, initial, submitLabel, busy, onSubmit, onCan
       )}
       <div className={f.wide || f.type === 'textarea' || f.type === 'tags' ? 'sm:col-span-2' : ''}>
         <FieldInput f={shape(f)} value={values[f.key]} name={String(values.name ?? '')} lookups={lookups}
-          onChange={(v) => setValues((s) => ({ ...s, [f.key]: v, ...(isEcho && f.key === 'class' && CLASS_COST[v] ? { cost: CLASS_COST[v] } : {}), ...(f.key === 'build_name' && fields.some((x) => x.key === 'echo_set') && !String(s.echo_set ?? '').trim() && SONATA_SETS.includes(String(v).replace(/^Alternative /, '')) ? { echo_set: `${String(v).replace(/^Alternative /, '')} X${String(v).includes('Shadow of Shattered Dreams') ? 1 : 5}` } : {}), ...(f.key === 'echo_set' && v && fields.some((x) => x.key === 'build_name') && !String(s.build_name ?? '').trim() ? { build_name: String(v).replace(/ Xd/g, '') } : {}) }))}
-          setOther={(k, v) => setValues((s) => ({ ...s, [k]: v }))} />
+          onChange={(v) => markDirty() ?? setValues((s) => ({ ...s, [f.key]: v, ...(isEcho && f.key === 'class' && CLASS_COST[v] ? { cost: CLASS_COST[v] } : {}), ...(f.key === 'build_name' && fields.some((x) => x.key === 'echo_set') && !String(s.echo_set ?? '').trim() && SONATA_SETS.includes(String(v).replace(/^Alternative /, '')) ? { echo_set: `${String(v).replace(/^Alternative /, '')} X${String(v).includes('Shadow of Shattered Dreams') ? 1 : 5}` } : {}), ...(f.key === 'echo_set' && v && fields.some((x) => x.key === 'build_name') && !String(s.build_name ?? '').trim() ? { build_name: String(v).replace(/ Xd/g, '') } : {}) }))}
+          setOther={(k, v) => { markDirty(); setValues((s) => ({ ...s, [k]: v })); }} />
       </div>
     </Fragment>
   );
@@ -523,14 +558,14 @@ export function EntityForm({ fields, initial, submitLabel, busy, onSubmit, onCan
           {lookNote && <p role="status" className="mt-2 text-sm">{lookNote}</p>}
         </div>
       )}
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-2">
         {main.map((f, i) => field(f, i, main, !hasAdvanced))}
       </div>
       {error && <p role="alert" className="text-sm text-error">{error}</p>}
       <div className="modal-action">
         <button type="button" className="btn" onClick={onCancel}>Cancel</button>
         <button type="submit" className="btn btn-primary" disabled={busy}>
-          {busy && <span className="loading loading-spinner loading-sm" />} {submitLabel}
+          {busy ? <span className="loading loading-spinner loading-sm" /> : submitLabel.startsWith('Add') ? <PlusIcon /> : <SaveIcon />} {submitLabel}
         </button>
       </div>
     </form>

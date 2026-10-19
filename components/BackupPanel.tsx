@@ -53,7 +53,7 @@ export function BackupPanel() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Backup</h1>
-        <p className="text-base-content/70">Keep a copy of your data, or bring records back from one.</p>
+        <p className="text-base-content/70">Save a copy of your data, or restore one.</p>
       </div>
 
       <section aria-labelledby="dl-h" className="card card-border bg-base-100">

@@ -14,6 +14,8 @@ export type Field = {
   help?: string;
   placeholder?: string;
   options?: string[];
+  /** select fields: what to show for a saved value (the saved value itself does not change) */
+  optionLabels?: Record<string, string>;
   ref?: CollectionKey; // type "ref": pick a record name from another collection
   wide?: boolean;
   /** heading shown above this field (and the ones after it) in forms and guides */
@@ -64,6 +66,11 @@ export const SKILL_TYPES = [
   'Inherent Skill 1', 'Inherent Skill 2', 'Sequence 1', 'Sequence 2', 'Sequence 3', 'Sequence 4', 'Sequence 5', 'Sequence 6',
 ];
 export const SKILL_CATEGORIES = ['Active', 'Passive', 'Chain', 'Concerto'];
+/** Skill categories as the panel shows them. The saved values stay Active, Passive, Chain and Concerto. */
+export const SKILL_CATEGORY_LABELS: Record<string, string> = {
+  Chain: 'Resonance Chain', Active: 'Active Skills', Concerto: 'Concerto Skills', Passive: 'Passive Skills',
+};
+
 export const ROLES = ['Main DPS', 'Sub DPS', 'Support', 'Healer', 'Hybrid'];
 
 const SHORTCUTS: Field = { key: 'shortcuts', label: 'Shortcuts / aliases', type: 'tags', help: 'Alternative names players can type, e.g. "jh".' };
@@ -72,7 +79,7 @@ const EMOJI_HELP = 'Discord emoji code, e.g. <:Name:123456789>.';
 export const COLLECTIONS: Record<CollectionKey, CollectionConfig> = {
   resonators: {
     key: 'resonators', label: 'Resonators', singular: 'Resonator', titleKey: 'name', badge: 'element', iconKey: 'icon_url',
-    blurb: 'Playable resonataors, that shows their respective element, weapon and rarity.',
+    blurb: 'Playable characters with their element, weapon and rarity.',
     filters: [{ key: 'element', label: 'Element' }, { key: 'weapon_type', label: 'Weapon' }, { key: 'rarity', label: 'Rarity' }],
     columns: [{ key: 'element', label: 'Element' }, { key: 'weapon_type', label: 'Weapon' }, { key: 'rarity', label: 'Rarity' }],
     fields: [
@@ -89,7 +96,7 @@ export const COLLECTIONS: Record<CollectionKey, CollectionConfig> = {
   },
   echoes: {
     key: 'echoes', label: 'Echoes', singular: 'Echo', titleKey: 'name', badge: 'class', iconKey: 'icon_url',
-    blurb: 'Equipable echoes that shows their respective cost, class and sonata effects.',
+    blurb: 'Echoes with their cost, class and Sonata sets.',
     filters: [{ key: 'class', label: 'Class' }, { key: 'cost', label: 'Cost' }, { key: 'sonata_effects', label: 'Sonata effect' }],
     columns: [{ key: 'cost', label: 'Cost' }, { key: 'class', label: 'Class' }],
     fields: [
@@ -105,7 +112,7 @@ export const COLLECTIONS: Record<CollectionKey, CollectionConfig> = {
   },
   weapons: {
     key: 'weapons', label: 'Weapons', singular: 'Weapon', titleKey: 'name', badge: 'weapon_type', iconKey: 'icon_url',
-    blurb: 'Equipable weapons that shows their respective type, rarity and secondary stat.',
+    blurb: 'Weapons with their type, rarity and stats.',
     filters: [{ key: 'weapon_type', label: 'Weapon type' }, { key: 'rarity', label: 'Rarity' }, { key: 'secondary_stat.title', label: 'Secondary stat' }],
     columns: [{ key: 'weapon_type', label: 'Type' }, { key: 'rarity', label: 'Rarity' }, { key: 'secondary_stat.title', label: 'Stat' }],
     fields: [
@@ -116,8 +123,10 @@ export const COLLECTIONS: Record<CollectionKey, CollectionConfig> = {
       { key: 'secondary_stat.title', label: 'Secondary stat', type: 'text', placeholder: 'CRIT Rate' },
       { key: 'secondary_stat.stats', label: 'Secondary stat value', type: 'text', placeholder: '**24.3%**' },
       { key: 'passive', label: 'Passive', type: 'textarea', section: 'Passive', help: 'List the values for refinements 1 to 5 separated by slashes, e.g. **12.8%/16%/19.2%/22.4%/25.6%**.' },
+      { key: 'signature_for', label: 'Signature weapon of', type: 'ref', ref: 'resonators', section: 'Resonators', help: 'The resonator this weapon was made for, if any.' },
+      { key: 'recommended_for', label: 'Recommended for', type: 'tags', ref: 'resonators', wide: true, help: 'Pick the resonators this weapon works well on.' },
       { key: 'upgrade_materials', label: 'Upgrade materials', type: 'textarea', section: 'Guide', wide: true, help: 'What it costs to level it. Free text.' },
-      { key: 'notes', label: 'Notes', type: 'textarea', wide: true, help: 'Anything players should know. The “recommended for” list is built automatically from your Builds.' },
+      { key: 'notes', label: 'Notes', type: 'textarea', wide: true, help: 'Anything players should know.' },
       SHORTCUTS,
       { key: 'icon_url', label: 'Icon', type: 'image', folder: 'WeaponIcons', emojiKey: 'emoji', wide: true },
       { key: 'emoji', label: 'Emoji', type: 'text', help: EMOJI_HELP },
@@ -125,7 +134,7 @@ export const COLLECTIONS: Record<CollectionKey, CollectionConfig> = {
   },
   builds: {
     key: 'builds', label: 'Builds', singular: 'Build', titleKey: 'build_name', subtitleKey: 'resonator_id', iconResonatorKey: 'resonator_id',
-    blurb: 'Recommended builds for each resonator, showing the echo sets and stats. ',
+    blurb: 'Recommended echo sets and stats for each resonator.',
     groupBy: 'resonator_id',
     filters: [{ key: 'resonator_id', label: 'Resonator' }, { key: 'role', label: 'Role' }, { key: 'is_primary', label: 'Primary' }, { key: 'echo_set', label: 'Echo set' }],
     columns: [{ key: 'priority', label: 'Priority' }, { key: 'is_primary', label: 'Primary' }, { key: 'echo_set', label: 'Echo set' }],
@@ -164,14 +173,14 @@ export const COLLECTIONS: Record<CollectionKey, CollectionConfig> = {
   },
   skills: {
     key: 'skills', label: 'Skills', singular: 'Skill', titleKey: 'name', subtitleKey: 'resonator_id', iconResonatorKey: 'resonator_id',
-    blurb: 'Shows the skill descriptions of each playable resonator.',
+    blurb: 'What each resonator’s skills do.',
     groupBy: 'resonator_id',
     filters: [{ key: 'resonator_id', label: 'Resonator' }, { key: 'skill_type', label: 'Skill type' }, { key: 'skill_category', label: 'Category' }],
     columns: [{ key: 'skill_type', label: 'Type' }, { key: 'skill_category', label: 'Category' }, { key: 'order', label: 'Order' }],
     fields: [
       { key: 'resonator_id', label: 'Resonator', type: 'ref', ref: 'resonators', required: true },
       { key: 'skill_type', label: 'Skill type', type: 'select', options: SKILL_TYPES, required: true },
-      { key: 'skill_category', label: 'Category', type: 'select', options: SKILL_CATEGORIES },
+      { key: 'skill_category', label: 'Category', type: 'select', options: SKILL_CATEGORIES, optionLabels: SKILL_CATEGORY_LABELS },
       { key: 'name', label: 'Skill name', type: 'text', required: true },
       { key: 'order', label: 'Order', type: 'number' },
       { key: 'description', label: 'Description', type: 'textarea' },
@@ -220,3 +229,10 @@ export const emojiName = (code: string) => {
 
 /** Strip Discord emoji codes and backticks for plain-text display. */
 export const plain = (s: unknown) => String(s ?? '').replace(/<a?:\w+:\d+>/g, '').replace(/`/g, '').replace(/\s+/g, ' ').trim();
+
+/** A percentage ATK, HP or DEF stat is shown as "ATK%", "HP%" or "DEF%", even when the title was saved without the sign. */
+export function statLabel(title: unknown, value?: unknown): string {
+  const t = plain(title);
+  return /^(ATK|HP|DEF)$/i.test(t) && /%\s*\**\s*$/.test(String(value ?? '').trim()) ? `${t}%` : t;
+}
+

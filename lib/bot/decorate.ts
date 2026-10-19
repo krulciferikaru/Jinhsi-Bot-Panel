@@ -4,7 +4,7 @@ import type { BotTarget } from './manager';
 /** Puts each bot's own Discord emoji in front of set, echo and stat names that were saved as plain text. */
 const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
 const ALIAS: Record<string, string> = {
-  endlessresonance: 'lingeringtunes', gauntlet: 'gauntlets21d', critrate: 'critrate', critdmg: 'critdmg',
+  endlessresonance: 'lingeringtunes', havoceclipse: 'sunsinkingeclipse', gauntlet: 'gauntlets21d', critrate: 'critrate', critdmg: 'critdmg',
   atk: 'atk', hp: 'hp', def: 'def', energyregen: 'energyregen', healingbonus: 'healingbonus',
 };
 

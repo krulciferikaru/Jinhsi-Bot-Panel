@@ -45,7 +45,8 @@
   --glass-bg: rgba(255, 255, 255, 0.03);
   --glass-bg-strong: rgba(14, 14, 14, 0.78);
   --glass-border: rgba(255, 255, 255, 0.1);
-  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 html { background: #000; }
@@ -63,6 +64,7 @@ h1, h2, h3, .card-title { letter-spacing: -0.04em; font-weight: 600; }
   max-width: 1600px;
   margin: 0.75rem auto;
   min-height: calc(100vh - 1.5rem);
+  min-height: calc(100svh - 1.5rem);
   border-radius: 2.5rem;
   background: #0d0b08;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 25px 50px -12px rgba(0, 0, 0, 0.8);
@@ -109,8 +111,8 @@ h1, h2, h3, .card-title { letter-spacing: -0.04em; font-weight: 600; }
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
 }
 .modal::backdrop, .modal-backdrop { backdrop-filter: blur(8px); }
-dialog.modal[open] .modal-box { animation: pop 0.4s var(--ease); }
-@keyframes pop { from { opacity: 0; transform: translateY(14px) scale(0.96); } to { opacity: 1; transform: none; } }
+dialog.modal[open] .modal-box { animation: pop 0.22s var(--ease); }
+@keyframes pop { from { opacity: 0; transform: translateY(8px) scale(0.97); } to { opacity: 1; transform: none; } }
 
 .input, .select, .textarea {
   background: rgba(255, 255, 255, 0.04);
@@ -130,12 +132,15 @@ dialog.modal[open] .modal-box { animation: pop 0.4s var(--ease); }
   border: 1px solid var(--glass-border);
   border-radius: 9999px;
 }
-.pill-nav a { border-radius: 9999px; padding: 0.45rem 0.95rem; font-size: 0.875rem; color: rgba(255, 255, 255, 0.7); transition: all 0.25s var(--ease); }
-.pill-nav a:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
-.pill-nav a[aria-current="page"] { color: #000; background: var(--lime); font-weight: 600; }
+.pill-nav a, .pill-nav button { border-radius: 9999px; padding: 0.45rem 0.95rem; font-size: 0.875rem; color: rgba(255, 255, 255, 0.7); transition: color 0.15s var(--ease), background-color 0.15s var(--ease); }
+.pill-nav a:hover, .pill-nav button:hover, .pill-nav button[aria-expanded="true"] { color: #fff; background: rgba(255, 255, 255, 0.08); }
+.pill-nav button { display: block; cursor: pointer; }
+.pill-logo { margin-inline: 0.15rem 0.35rem; }
+.pill-logo a { display: block; line-height: 0; border-radius: 9999px; }
+.pill-nav a[aria-current="page"], .pill-nav button[data-current="true"] { color: #000; background: var(--lime); font-weight: 600; }
 
 /* ---------- Buttons ---------- */
-.btn { border-radius: 9999px; font-weight: 600; transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), background 0.25s; }
+.btn { border-radius: 9999px; font-weight: 600; transition: transform 0.15s var(--ease), box-shadow 0.2s var(--ease), background 0.2s; }
 .btn:active { transform: scale(0.97); }
 .btn-primary { box-shadow: 0 0 30px rgba(255, 217, 59, 0.3); border: 0; }
 .btn-primary:hover { transform: scale(1.04); }
@@ -210,7 +215,8 @@ select option { padding: 0.65rem 1rem; }
   color: #ebebeb; border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 1rem;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
 }
-.combo-panel:popover-open { display: flex; animation: pop 0.18s var(--ease); }
+.combo-panel:popover-open { display: flex; transform-origin: top; animation: pop-menu 0.15s var(--ease); }
+@keyframes pop-menu { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: none; } }
 .combo-search input {
   width: 100%; min-height: 2.5rem; padding: 0.5rem 0.9rem; font: inherit; color: inherit;
   background: #0d0b08; border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 0.75rem;
@@ -264,7 +270,7 @@ html { scroll-padding-top: 5rem; }
 
 /* Mid-size screens: tighter nav so the header button is never clipped */
 @media (max-width: 1279px) {
-  .pill-nav a { padding: 0.4rem 0.65rem; font-size: 0.8rem; }
+  .pill-nav a, .pill-nav button { padding: 0.4rem 0.65rem; font-size: 0.8rem; }
 }
 
 
@@ -301,4 +307,156 @@ html { -webkit-tap-highlight-color: rgba(255, 217, 59, 0.15); }
   .btn, .btn-sm, .btn-xs, .tab, .select-trigger, .combo-option { min-height: 2.75rem; }
   .btn-square, .btn-circle { min-width: 2.75rem; }
   .badge button { min-height: 2rem; min-width: 2rem; }
+}
+
+
+/* ---------- Quiet cards and the overflow menu ---------- */
+
+/* The record's name is the card's one real control; its ::after covers the whole card (stretched link). */
+.doc-card-link { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; max-width: 100%; }
+.doc-card-link::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+.doc-card-link:focus-visible { outline: none; }
+.doc-card-link:focus-visible::after { outline: 2px solid var(--lime); outline-offset: 2px; }
+.card:has(.doc-card-link) { transition: border-color 0.15s, background-color 0.15s, transform 0.15s var(--ease); }
+.card:has(.doc-card-link):active { transform: scale(0.985); }
+.card:has(.doc-card-link):hover { border-color: rgba(255, 255, 255, 0.28); background-color: rgba(255, 255, 255, 0.06); }
+.doc-row { border-radius: 0.5rem; padding-inline: 0.5rem; margin-inline: -0.5rem; transition: background-color 0.15s; }
+.doc-row:hover { background-color: rgba(255, 255, 255, 0.05); }
+
+.action-menu-trigger {
+  display: grid; place-items: center; width: 2.25rem; height: 2.25rem; border-radius: 0.6rem;
+  color: rgba(235, 235, 235, 0.65); background: transparent; border: 0; cursor: pointer; transition: background-color 0.15s, color 0.15s;
+}
+.action-menu-trigger:hover, .action-menu-trigger[aria-expanded="true"] { background: rgba(255, 255, 255, 0.1); color: #fff; }
+@media (pointer: coarse) { .action-menu-trigger { width: 2.75rem; height: 2.75rem; } }
+.action-menu { min-width: 11rem; padding: 0.35rem; gap: 0; }
+.action-menu .combo-option:hover, .action-menu .combo-option:focus-visible { background: rgba(255, 255, 255, 0.1); outline: none; }
+.action-menu .combo-option.text-error:hover, .action-menu .combo-option.text-error:focus-visible { background: rgba(255, 90, 90, 0.14); }
+
+/* The typeable page box in the compact pagination. */
+.pager-input {
+  width: 3.5rem; height: 2rem; padding: 0 0.25rem; text-align: center; font: inherit; font-weight: 600; color: inherit;
+  background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 0.6rem;
+}
+.pager-input:focus { border-color: var(--lime); box-shadow: 0 0 0 3px rgba(255, 217, 59, 0.18); outline: none; }
+@media (pointer: coarse) { .pager-input { height: 2.75rem; } }
+
+/* The plain dark buttons (Import, Previous, Next, Close ...) have no white outline; keyboard focus still shows the gold ring. */
+.btn:not(.btn-primary):not(.btn-ghost):not(.btn-outline):not(.btn-error):not(.btn-warning):not(.btn-success) {
+  --btn-border: transparent;
+  border-color: transparent;
+}
+
+/* A long name stays on one line (so every card is the same height) and ends in an ellipsis. */
+.doc-card-link { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+
+/* ---------- Phones ---------- */
+
+/* Long unbroken text (emoji codes, URLs) wraps instead of pushing the layout wider. */
+.break-words, .whitespace-pre-wrap { overflow-wrap: anywhere; }
+
+/* Small caps labels were 10 px: keep them readable. */
+.mono-label { font-size: 11px; }
+
+@media (max-width: 639px) {
+  /* Dialogs use the screen: less padding and almost the full width. */
+  .modal-box { width: calc(100vw - 1rem); max-width: none; padding: 1rem; border-radius: 1.5rem; }
+  .modal-box .modal-action { flex-wrap: wrap; }
+  .modal-box .modal-action .btn { flex: 1 1 8rem; }
+  /* Filter panel: two columns is plenty on a phone, and the view switch sits on its own line. */
+  .site-header { padding-inline: 1rem; }
+}
+
+@media (pointer: coarse) {
+  /* Footer links, the card "View" link, the density switch and the drawer menu get a finger-sized hit area. */
+  footer nav a { display: inline-flex; align-items: center; min-height: 2.75rem; padding-inline: 0.25rem; }
+  .doc-card-all { min-height: 2.75rem; display: inline-flex; align-items: center; padding-inline: 0.5rem; margin-inline: -0.5rem; }
+  [role="group"] > button[aria-pressed] { min-height: 2.5rem; padding-inline: 0.9rem; }
+  .menu li > a, .menu li > button { min-height: 2.75rem; }
+  .doc-row { min-height: 2.75rem; }
+}
+
+.pager-edge { padding-inline: 0.75rem; }
+@media (max-width: 639px) {
+  .mono-label { font-size: 12px; letter-spacing: 0.14em; }
+}
+@media (pointer: coarse) {
+  summary { min-height: 2.75rem; display: flex; align-items: center; }
+}
+
+/* ---------- Header menu: a wide panel that drops under the header ---------- */
+.mega-panel {
+  position: absolute; left: 0; right: 0; top: calc(100% + 0.4rem);
+  width: max-content; max-width: calc(100% - 2rem); margin-inline: auto;
+  display: grid; grid-template-rows: 0fr;
+  visibility: hidden;
+  background: rgba(13, 11, 8, 0.94);
+  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0);
+  border-radius: 1.75rem;
+  box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.7);
+  opacity: 0; transform: translateY(-6px);
+  transition: grid-template-rows 0.45s var(--ease-drawer) 0.07s, opacity 0.3s var(--ease) 0.15s, transform 0.45s var(--ease-drawer) 0.07s, border-color 0.3s var(--ease), visibility 0s linear 0.52s;
+}
+.mega[data-open="true"] .mega-panel { grid-template-rows: 1fr; visibility: visible; opacity: 1; transform: none; border-color: rgba(255, 255, 255, 0.12); transition: grid-template-rows 0.5s var(--ease-drawer), opacity 0.3s var(--ease), transform 0.5s var(--ease-drawer), border-color 0.4s var(--ease), visibility 0s; }
+/* an invisible bridge, so the pointer can cross the gap between the menu and the panel without closing it */
+.mega-panel::before { content: ""; position: absolute; left: 0; right: 0; top: -1.25rem; height: 1.25rem; }
+.mega-clip { min-height: 0; overflow: hidden; display: grid; }
+.mega-items {
+  grid-area: 1 / 1; list-style: none; margin: 0; padding: 1rem 1rem 1.1rem;
+  display: flex; flex-wrap: nowrap; justify-content: center; text-align: center; gap: 0.25rem 0.75rem; align-content: flex-start;
+  opacity: 0; transition: opacity 0.2s var(--ease) 0.05s;
+}
+/* only the group being shown sets the panel width, so the panel fits what is inside it */
+.mega-items[data-shown="false"] { position: absolute; left: 0; right: 0; pointer-events: none; }
+.mega-items[data-on="true"] { opacity: 1; transition: opacity 0.3s var(--ease) 0.08s; }
+.mega-items li { flex: 0 0 auto; opacity: 0; transform: translateY(-8px); filter: blur(2px); transition: opacity 0.16s var(--ease), transform 0.28s var(--ease-drawer), filter 0.16s var(--ease); transition-delay: calc((var(--n, 1) - 1 - var(--i, 0)) * 0.025s); }
+.mega-items[data-on="true"] li { opacity: 1; transform: none; filter: none; transition: opacity 0.4s var(--ease), transform 0.5s var(--ease-drawer); transition-delay: calc(0.1s + var(--i, 0) * 0.04s); }
+.mega-items a { display: block; white-space: nowrap; border-radius: 1rem; padding: 0.7rem 1.25rem; transition: background-color 0.15s var(--ease); }
+.mega-items a:hover, .mega-items a:focus-visible { background: rgba(255, 255, 255, 0.07); }
+.mega-title { display: block; font-size: 1.35rem; font-weight: 600; letter-spacing: -0.01em; color: #fff; }
+.mega-items a[aria-current="page"] .mega-title { color: var(--lime); }
+.mega-blurb { display: block; margin-top: 0.15rem; font-size: 0.8rem; color: rgba(255, 255, 255, 0.6); }
+.mega-dim {
+  position: fixed; inset: 0; z-index: 20; pointer-events: none; opacity: 0;
+  background: rgba(0, 0, 0, 0.45); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  transition: opacity 0.45s var(--ease) 0.05s;
+}
+.mega-dim[data-open="true"] { opacity: 1; pointer-events: auto; transition-delay: 0s; }
+@media (prefers-reduced-motion: reduce) {
+  .mega-panel, .mega-items, .mega-items li, .mega-dim { transition-duration: 0.01s; transition-delay: 0s; }
+  .mega-items li { transform: none; filter: none; }
+}
+
+
+/* ---------- Interaction motion ---------- */
+/* A panel that folds open and shut instead of appearing (the filters). */
+.reveal {
+  display: grid; grid-template-rows: 0fr; opacity: 0; visibility: hidden;
+  transition: grid-template-rows 0.3s var(--ease-drawer), opacity 0.18s var(--ease), visibility 0s linear 0.3s;
+}
+.reveal[data-open="true"] { grid-template-rows: 1fr; opacity: 1; visibility: visible; transition: grid-template-rows 0.4s var(--ease-drawer), opacity 0.25s var(--ease) 0.05s, visibility 0s; }
+.reveal > * { min-height: 0; overflow: clip; overflow-clip-margin: 6px; }
+
+/* Rows that appear when "Show all" is pressed arrive one after another. */
+.group-list > li:nth-child(n + 4) { animation: row-in 0.3s var(--ease) backwards; animation-delay: calc((var(--n, 0)) * 30ms); }
+.group-list > li:nth-child(4) { --n: 0; } .group-list > li:nth-child(5) { --n: 1; } .group-list > li:nth-child(6) { --n: 2; }
+.group-list > li:nth-child(7) { --n: 3; } .group-list > li:nth-child(8) { --n: 4; } .group-list > li:nth-child(n + 9) { --n: 5; }
+@keyframes row-in { from { opacity: 0; transform: translateY(-6px); } }
+
+/* Toasts slide in from the edge and fade out before they go. */
+.toast > .alert { animation: toast-in 0.3s var(--ease-drawer) backwards; transition: opacity 0.22s var(--ease), transform 0.22s var(--ease); }
+.toast > .alert[data-leaving="true"] { opacity: 0; transform: translateX(12px); }
+@keyframes toast-in { from { opacity: 0; transform: translateX(24px) scale(0.97); } }
+
+/* Each page eases in after navigation. */
+.page-in { animation: page-in 0.3s var(--ease) backwards; }
+@keyframes page-in { from { opacity: 0; transform: translateY(6px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .reveal[data-open="true"] { transition-duration: 0.01s; transition-delay: 0s; }
+  .group-list > li, .toast > .alert, .page-in { animation: none; }
+  .toast > .alert[data-leaving="true"] { transform: none; }
+  .card:has(.doc-card-link):active { transform: none; }
 }

@@ -1,16 +1,10 @@
 /** Sonata (echo set) names, as written in builds. */
 export const SONATA_SETS = [
-  'Celestial Light', 'Chromatic Foam', 'Crown of Valor', 'Dream of the Lost', 'Empyrean Anthem', 'Eternal Radiance',
-  "Flamewing's Shadow", 'Flaming Clawprint', 'Flash of Electric Reflection', 'Flower of Tinged Yearning', 'Freezing Frost',
-  'Frosty Resolve', 'Gusts of Welkin', 'Halo of Starry Radiance', "Heart of Evil's Purge", 'Heart of Sworn Vigil',
-  'Lamp of Nether Road', 'Law of Harmony', 'Endless Resonance', 'Midnight Veil', 'Molten Rift', 'Moonlit Clouds', 'Pact of Neonlight Leap',
-  'Reel of Spliced Memories', 'Rejuvenating Glow', 'Rite of Gilded Revelation', 'Shadow of Shattered Dreams', 'Sierra Gale',
-  'Song of Feathered Trace', 'Sound of True Name', 'Sun-sinking Eclipse', 'Thread of Severed Fate', 'Tidebreaking Courage',
-  'Trailblazing Star', 'Void Thunder', 'Windward Pilgrimage', 'Wishes of Quiet Snowfall',
+  'Celestial Light', 'Chromatic Foam', 'Crown of Valor', 'Dream of the Lost', 'Empyrean Anthem', 'Endless Resonance', 'Eternal Radiance', "Flamewing's Shadow", 'Flaming Clawprint', 'Flash of Electric Reflection', 'Flower of Tinged Yearning', 'Freezing Frost', 'Frosty Resolve', 'Gusts of Welkin', 'Halo of Starry Radiance', 'Havoc Eclipse', "Heart of Evil's Purge", 'Heart of Sworn Vigil', 'Lamp of Nether Road', 'Law of Harmony', 'Midnight Veil', 'Molten Rift', 'Moonlit Clouds', 'Pact of Neonlight Leap', 'Reel of Spliced Memories', 'Rejuvenating Glow', 'Rite of Gilded Revelation', 'Shadow of Shattered Dreams', 'Sierra Gale', 'Song of Feathered Trace', 'Sound of True Name', 'Thread of Severed Fate', 'Tidebreaking Courage', 'Trailblazing Star', 'Void Thunder', 'Windward Pilgrimage', 'Wishes of Quiet Snowfall',
 ];
 
 /** Sets whose Discord emoji is still named after an older set name. */
-export const SET_EMOJI_ALIAS: Record<string, string> = { 'Endless Resonance': 'Lingering Tunes' };
+export const SET_EMOJI_ALIAS: Record<string, string> = { 'Endless Resonance': 'Lingering Tunes', 'Havoc Eclipse': 'Sunsinking Eclipse' };
 
 /** "Celestial Light X5", "Celestial Light X2" … for the echo-set dropdown (5-piece sets and the 2/3-piece halves of a mixed set). */
 export const SET_OPTIONS = SONATA_SETS.flatMap((s) => [`${s} X5`, `${s} X3`, `${s} X2`]);
@@ -44,3 +38,17 @@ export function statChoices(cost: 4 | 3 | 1, element?: string): string[] {
 
 /** Build names: the set name, or "Alternative <set>" for a second build. */
 export const BUILD_NAMES = [...SONATA_SETS, ...SONATA_SETS.map((s) => `Alternative ${s}`)];
+
+const setKey = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+/**
+ * The proper set name for a name read from an emoji ("CrownOfValor" or "Crown Of Valor" become "Crown of Valor"),
+ * including emojis still named after an older set name.
+ */
+export function properSetName(raw: string): string {
+  const k = setKey(raw);
+  const direct = SONATA_SETS.find((s) => setKey(s) === k);
+  if (direct) return direct;
+  const viaAlias = Object.entries(SET_EMOJI_ALIAS).find(([, old]) => setKey(old) === k)?.[0];
+  return viaAlias ?? raw;
+}

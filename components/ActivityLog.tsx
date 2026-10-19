@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Combobox } from './Combobox';
 import { Modal, Pagination } from './Manager';
 import { useToast } from './Toast';
+import { ActivitySkeleton } from './Skeletons';
 import { COLLECTIONS, plain, type CollectionKey } from '@/lib/schema';
 
 type Change = { key: string; from: unknown; to: unknown };
@@ -108,7 +109,7 @@ export function ActivityLog() {
     <div className="space-y-4">
       <div>
         <h1 className="text-3xl font-bold">Activity</h1>
-        <p className="text-base-content/70">Every change made from this dashboard, newest first. Record changes can be undone.</p>
+        <p className="text-base-content/70">Every change made here, newest first.</p>
       </div>
 
       {error && (
@@ -140,7 +141,7 @@ export function ActivityLog() {
       <Pagination page={data?.page ?? 1} pages={data?.pages ?? 1} onPage={setPage} />
 
       {!data ? (
-        <div className="space-y-3">{Array.from({ length: 5 }).map((_, i) => <div key={i} className="skeleton h-20" />)}</div>
+        <ActivitySkeleton />
       ) : items.length === 0 ? (
         <div className="rounded-box border border-dashed border-white/15 p-10 text-center">
           <p>{filtered ? 'Nothing matches those filters.' : 'No activity yet. Changes you make will show up here.'}</p>

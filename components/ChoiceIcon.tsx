@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 
 const key = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
-const ALIAS: Record<string, string> = { gauntlet: 'gauntlets21d', gauntlets: 'gauntlets21d', crit: 'critrate', endlessresonance: 'lingeringtunes' };
+const ALIAS: Record<string, string> = { gauntlet: 'gauntlets21d', gauntlets: 'gauntlets21d', crit: 'critrate', endlessresonance: 'lingeringtunes', havoceclipse: 'sunsinkingeclipse' };
 
 let cache: Promise<Map<string, string>> | null = null;
 let loadedAt = 0;
@@ -29,8 +29,8 @@ export function useChoiceIcons() {
   };
 }
 
-export function ChoiceIcon({ src }: { src?: string }) {
+export function ChoiceIcon({ src, muted }: { src?: string; muted?: boolean }) {
   if (!src) return null;
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={src} alt="" width={20} height={20} loading="lazy" className="h-5 w-5 shrink-0 object-contain" />;
+  return <img src={src} alt="" width={20} height={20} loading="lazy" className={`h-5 w-5 shrink-0 object-contain transition ${muted ? 'opacity-70 grayscale' : ''}`} />;
 }
