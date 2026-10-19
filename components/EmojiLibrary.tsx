@@ -1,8 +1,10 @@
 'use client';
+import { CopyIcon, PencilIcon, TrashIcon, UploadIcon } from './Icons';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ActionMenu } from './ActionMenu';
+import { EmojiGridSkeleton } from './Skeletons';
 import { Modal, Pagination } from './Manager';
 import { useToast } from './Toast';
-import { AssetTabs } from './AssetTabs';
 
 type Target = 'live' | 'test';
 type Emoji = { id: string; name: string; animated: boolean; url: string; code: string };
@@ -114,13 +116,12 @@ export function EmojiLibrary() {
 
   return (
     <div className="space-y-4">
-      <AssetTabs />
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Emojis</h1>
-          <p className="text-base-content/70">The bot’s own application emojis. They work in every server the bot is in, with no extra setup.</p>
+          <p className="text-base-content/70">The bots’ own emojis, usable in any server.</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setDialog({ kind: 'upload' })}>+ Upload emojis</button>
+        <button className="btn btn-primary" onClick={() => setDialog({ kind: 'upload' })}><UploadIcon />Upload emojis</button>
       </div>
 
       {error && (
@@ -155,7 +156,7 @@ export function EmojiLibrary() {
       <Pagination page={cur} pages={pages} onPage={setPage} />
 
       {!data ? (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-5">{Array.from({ length: 12 }).map((_, i) => <div key={i} className="skeleton h-36" />)}</div>
+        <EmojiGridSkeleton />
       ) : shown.length === 0 ? (
         <div className="rounded-box border border-dashed border-white/15 p-10 text-center">
           <p>{q ? 'No emojis match your search.' : `The ${target} bot has no emojis yet.`}</p>
@@ -167,11 +168,13 @@ export function EmojiLibrary() {
               <div className="card-body items-center gap-2 p-3 text-center">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={e.url} alt="" width={48} height={48} loading="lazy" className="h-12 w-12 object-contain" />
-                <p className="w-full truncate text-sm font-medium" title={e.name}>{e.name}</p>
-                <div className="flex flex-wrap justify-center gap-1">
-                  <button className="btn btn-xs btn-ghost" aria-label={`Copy code for ${e.name}`} onClick={() => copy(e)}>Copy</button>
-                  <button className="btn btn-xs btn-ghost" aria-label={`Rename ${e.name}`} onClick={() => { setName(e.name); setDialog({ kind: 'rename', emoji: e }); }}>Rename</button>
-                  <button className="btn btn-xs btn-ghost text-error" aria-label={`Delete ${e.name}`} onClick={() => setDialog({ kind: 'delete', emoji: e })}>Delete</button>
+                <div className="flex w-full items-center justify-between gap-1">
+                  <p className="min-w-0 flex-1 truncate text-left text-sm font-medium" title={e.name}>{e.name}</p>
+                  <ActionMenu label={`More actions for ${e.name}`} items={[
+                    { label: 'Copy code', icon: <CopyIcon />, onSelect: () => copy(e) },
+                    { label: 'Rename', icon: <PencilIcon />, onSelect: () => { setName(e.name); setDialog({ kind: 'rename', emoji: e }); } },
+                    { label: 'Delete', icon: <TrashIcon />, danger: true, separatorBefore: true, onSelect: () => setDialog({ kind: 'delete', emoji: e }) },
+                  ]} />
                 </div>
               </div>
             </li>

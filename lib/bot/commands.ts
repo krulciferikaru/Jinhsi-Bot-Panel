@@ -1,5 +1,5 @@
 import { getStore } from '../db';
-import { docIcon, resonatorIconUrl, type CollectionKey, type Doc } from '../schema';
+import { docIcon, resonatorIconUrl, statLabel, type CollectionKey, type Doc } from '../schema';
 import { decorator, emojiMap } from './decorate';
 import type { BotTarget } from './manager';
 
@@ -229,7 +229,7 @@ export const COMMANDS: CommandDef[] = [
           fields: [
             { name: 'Type', value: dec.one(w.weapon_type), inline: true },
             { name: 'ATK', value: w.base_attack?.stats || '—', inline: true },
-            { name: dec.one(w.secondary_stat?.title) || 'Secondary stat', value: w.secondary_stat?.stats || '—', inline: true },
+            { name: dec.one(statLabel(w.secondary_stat?.title, w.secondary_stat?.stats)) || 'Secondary stat', value: w.secondary_stat?.stats || '—', inline: true },
             { name: 'Passive', value: trunc(w.passive || '—') },
             ...(recommended ? [{ name: 'Recommended for', value: trunc(recommended), inline: false }] : []),
             ...(w.notes ? [{ name: 'Notes', value: trunc(String(w.notes), 500), inline: false }] : []),

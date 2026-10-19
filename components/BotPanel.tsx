@@ -41,7 +41,7 @@ function BotCard({ target, snap, busy, onStart, onStop }: {
           </span>
         </div>
 
-        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+        <motion.button whileTap={{ scale: 0.98 }}
           className={`btn btn-lg ${running ? 'btn-error' : 'btn-primary'}`}
           disabled={busy || !snap || snap.status === 'starting' || (!running && !snap.hasToken)}
           onClick={running ? onStop : onStart}>

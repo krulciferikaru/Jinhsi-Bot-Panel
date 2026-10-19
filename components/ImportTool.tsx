@@ -141,7 +141,7 @@ export function ImportTool() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Import</h1>
-        <p className="text-base-content/70">Add or update many records at once from a spreadsheet (CSV) or JSON. You see exactly what will happen before anything is saved.</p>
+        <p className="text-base-content/70">Add or update many records from CSV or JSON, with a preview first.</p>
       </div>
 
       <section aria-labelledby="s1" className="card card-border bg-base-100">

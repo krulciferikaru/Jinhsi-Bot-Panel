@@ -1,11 +1,18 @@
 'use client';
+import { ArchiveIcon, ChevronLeftIcon, ChevronRightIcon, ImportIcon, PencilIcon, PlusIcon, RestoreIcon, TrashIcon } from './Icons';
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { AnimatePresence, motion } from 'motion/react';
-import { COLLECTIONS, docIcon, emojiName, getPath, plain, type CollectionKey, type Doc, type Field } from '@/lib/schema';
+import { motion } from 'motion/react';
+import { COLLECTIONS, SKILL_CATEGORY_LABELS, docIcon, emojiName, getPath, plain, statLabel, type CollectionKey, type Doc, type Field } from '@/lib/schema';
 import { EntityForm, hydrate } from './EntityForm';
 import { Combobox } from './Combobox';
 import { ChoiceIcon, useChoiceIcons } from './ChoiceIcon';
+import { DocCard } from './DocCard';
+import { EchoView, ResonatorView, SkillView } from './ViewPanels';
+import { ActionMenu, type MenuItem } from './ActionMenu';
+import { ListSkeleton } from './Skeletons';
+import { FilterMenu } from './FilterMenu';
+import { properSetName } from '@/lib/sets';
 import { Icon } from './Icon';
 import { BuildGuide, WeaponGuide } from './Guides';
 import { useToast } from './Toast';
@@ -23,7 +30,7 @@ function fmt(v: unknown): string {
   return String(v);
 }
 
-export function Modal({ title, open, onClose, children, wide }: { title: string; open: boolean; onClose: () => void; children: React.ReactNode; wide?: boolean }) {
+export function Modal({ title, open, onClose, children, wide, beforeClose }: { title: string; open: boolean; onClose: () => void; children: React.ReactNode; wide?: boolean; /** return true to keep the dialog open (for example while asking to discard changes) */ beforeClose?: () => boolean }) {
   const ref = useRef<HTMLDialogElement>(null);
   const tid = useId();
   const openRef = useRef(open);
@@ -35,12 +42,12 @@ export function Modal({ title, open, onClose, children, wide }: { title: string;
     if (!open && d.open) d.close();
   }, [open]);
   return (
-    <dialog ref={ref} className="modal" onClose={() => { if (openRef.current) onClose(); }} aria-labelledby={tid}>
+    <dialog ref={ref} className="modal" onCancel={(e) => { if (beforeClose?.()) e.preventDefault(); }} onClose={() => { if (openRef.current) onClose(); }} aria-labelledby={tid}>
       <div data-lenis-prevent className={`modal-box ${wide ? 'max-w-3xl' : ''}`}>
         <h2 id={tid} className="mb-4 text-xl font-bold">{title}</h2>
         {open && children}
       </div>
-      <form method="dialog" className="modal-backdrop"><button tabIndex={-1} aria-label="Close dialog">close</button></form>
+      <form method="dialog" className="modal-backdrop"><button tabIndex={-1} aria-label="Close dialog" onClick={(e) => { e.preventDefault(); if (!beforeClose?.()) onClose(); }}>close</button></form>
     </dialog>
   );
 }
@@ -61,36 +68,77 @@ function valuesOf(d: Doc, key: string): string[] {
     // set names only: no emoji, no piece count (X5), and a mixed set counts as each of its sets
     return [...new Set(String(v).replace(/<a?:\w+:\d+>/g, '').split('+').map((p) => p.replace(/\bX\d\b/gi, '').replace(/\s+/g, ' ').trim()).filter(Boolean))];
   }
+  if (key === 'sonata_effects') return [...new Set((Array.isArray(v) ? v : [v]).flatMap((x) => String(x).match(/<a?:\w+:\d+>/g) ?? [String(x)]).map((c) => properSetName(emojiName(c))))];
+  if (key === 'skill_category') return [SKILL_CATEGORY_LABELS[String(v)] ?? String(v)];
+  if (key === 'secondary_stat.title') return [statLabel(v, d.secondary_stat?.stats)];
   return (Array.isArray(v) ? v : [v]).map(asLabel);
 }
 
 /* ---------- pagination ---------- */
-function pageList(page: number, total: number): (number | '…')[] {
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
-  const out: (number | '…')[] = [1];
-  const lo = Math.max(2, page - 1), hi = Math.min(total - 1, page + 1);
-  if (lo > 2) out.push('…');
-  for (let i = lo; i <= hi; i++) out.push(i);
-  if (hi < total - 1) out.push('…');
-  out.push(total);
-  return out;
-}
-
+/**
+ * Short lists show every page number. From three pages up it is compact: first page, "…", last page.
+ * Clicking the "…" turns it into a small box to type a page number (Enter jumps, Escape or leaving cancels).
+ * When you are on a middle page, that page number sits in the middle instead of "…".
+ */
 export function Pagination({ page, pages, onPage }: { page: number; pages: number; onPage: (p: number) => void }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState('');
+  const box = useRef<HTMLInputElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
+  const refocus = useRef(false);
+
+  useEffect(() => { if (editing) { box.current?.focus(); box.current?.select(); } }, [editing]);
+  useEffect(() => { if (!editing && refocus.current) { refocus.current = false; trigger.current?.focus(); } }, [editing]);
   if (pages <= 1) return null;
+
+  const finish = (raw: string, jump: boolean) => {
+    const n = Math.round(Number(raw));
+    if (jump && raw.trim() && Number.isFinite(n)) {
+      const target = Math.max(1, Math.min(pages, n));
+      if (target !== page) onPage(target);
+    }
+    setEditing(false);
+  };
+  const num = (p: number) => (
+    <button key={p} className={`btn btn-sm btn-square ${p === page ? 'btn-primary' : 'btn-ghost'}`}
+      aria-label={`Page ${p}`} aria-current={p === page ? 'page' : undefined} onClick={() => onPage(p)}>{p}</button>
+  );
+  const middle = page > 1 && page < pages;
+
   return (
-    <nav aria-label="Pagination" className="flex flex-wrap items-center justify-center gap-2">
-      <button className="btn btn-sm" disabled={page === 1} onClick={() => onPage(page - 1)}>← Previous</button>
-      {pageList(page, pages).map((p, i) =>
-        p === '…' ? <span key={`e${i}`} className="px-1 text-base-content/60" aria-hidden="true">…</span> : (
-          <button key={p} className={`btn btn-sm btn-square ${p === page ? 'btn-primary' : 'btn-ghost'}`}
-            aria-label={`Page ${p}`} aria-current={p === page ? 'page' : undefined} onClick={() => onPage(p)}>{p}</button>
-        ))}
-      <button className="btn btn-sm" disabled={page === pages} onClick={() => onPage(page + 1)}>Next →</button>
+    <nav aria-label="Pagination" className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+      <button className="btn btn-sm pager-edge" disabled={page === 1} onClick={() => onPage(page - 1)}><ChevronLeftIcon />Previous</button>
+      {pages < 3 ? Array.from({ length: pages }, (_, i) => num(i + 1)) : (
+        <>
+          {num(1)}
+          {editing ? (
+            <input
+              ref={box} className="pager-input" type="text" inputMode="numeric" pattern="[0-9]*" autoComplete="off" spellCheck={false}
+              aria-label={`Go to page, 1 to ${pages}`} placeholder={`1–${pages}`} value={draft}
+              onChange={(e) => setDraft(e.target.value.replace(/[^0-9]/g, '').slice(0, 5))}
+              onBlur={(e) => finish(e.currentTarget.value, false)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') { e.preventDefault(); refocus.current = true; finish(e.currentTarget.value, true); }
+                else if (e.key === 'Escape') { e.preventDefault(); refocus.current = true; finish('', false); }
+              }}
+            />
+          ) : (
+            <button
+              ref={trigger} type="button"
+              className={`btn btn-sm ${middle ? 'btn-primary btn-square' : 'btn-ghost btn-square'}`}
+              aria-label={`Page ${page} of ${pages}. Type a page number`} aria-current={middle ? 'page' : undefined} title="Type a page number"
+              onClick={() => { setDraft(''); setEditing(true); }}
+            >
+              {middle ? page : '…'}
+            </button>
+          )}
+          {num(pages)}
+        </>
+      )}
+      <button className="btn btn-sm pager-edge" disabled={page === pages} onClick={() => onPage(page + 1)}>Next<ChevronRightIcon /></button>
     </nav>
   );
 }
-
 
 /** Skills are grouped by their category field; builds stay a flat list. */
 const SKILL_SECTIONS: [label: string, category: string][] = [
@@ -98,25 +146,49 @@ const SKILL_SECTIONS: [label: string, category: string][] = [
 ];
 const sectionOf = (d: Doc) => SKILL_SECTIONS.find(([, c]) => c === d.skill_category)?.[0] ?? 'Other Skills';
 
-function GroupItems({ collection, items, title, actions }: {
-  collection: CollectionKey; items: Doc[]; title: (d: Doc) => string; actions: (d: Doc, small?: boolean) => React.ReactNode;
+const GROUP_LIMIT = 3;
+
+function GroupItems({ collection, items, title, onOpen, menuFor, dense }: {
+  collection: CollectionKey; items: Doc[]; title: (d: Doc) => string; onOpen: (d: Doc) => void; menuFor: (d: Doc) => MenuItem[]; dense?: boolean;
 }) {
+  const iconFor = useChoiceIcons();
+  const skillEmoji = (d: Doc) => { const m = /<a?:\w+:(\d+)>/.exec(String(d.emoji ?? '')); return m ? `https://cdn.discordapp.com/emojis/${m[1]}.png?size=64` : undefined; };
+  const setsOf = (d: Doc) => plain(d.echo_set).split('+').map((p) => p.replace(/\bX\d\b/gi, '').trim()).filter(Boolean);
   const row = (d: Doc) => (
-    <li key={d._id} className="flex items-center justify-between gap-3 py-2">
+    <li key={d._id} className={`doc-row relative flex items-center justify-between gap-2 ${dense ? 'py-0.5' : 'py-2'}`}>
       <div className="min-w-0 flex-1">
-        <p className="truncate font-medium">
-          {collection === 'builds' ? title(d) : String(d.skill_type ?? '')}
-          {collection === 'builds' && d.is_primary && <span className="badge badge-primary badge-sm ml-2">Primary</span>}
+        <p className="flex min-w-0 items-center gap-2 truncate font-medium">
+          {collection === 'skills' && <ChoiceIcon src={skillEmoji(d)} />}
+          {collection === 'builds' && <span className="flex shrink-0 items-center gap-1" aria-hidden="true">{setsOf(d).slice(0, 3).map((n) => <ChoiceIcon key={n} src={iconFor(n)} />)}</span>}
+          <button type="button" className="doc-card-link" onClick={() => onOpen(d)}>
+            {collection === 'builds' ? title(d) : String(d.skill_type ?? '')}
+          </button>
+          {collection === 'builds' && d.is_primary && <span className="badge badge-sm badge-primary ml-2 font-normal">Primary</span>}
         </p>
-        <p className="truncate text-sm text-base-content/60" title={collection === 'builds' ? plain(d.echo_set) : plain(d.name)}>
-          {collection === 'builds' ? plain(d.role) || '—' : plain(d.name)}
+        <p className={`truncate text-sm text-base-content/60 ${dense ? 'sr-only' : ''}`} title={collection === 'builds' ? plain(d.echo_set) : plain(d.name)}>
+          {collection === 'builds'
+            ? [plain(d.role), setsOf(d).join(' + ')].filter(Boolean).join(' · ') || '—'
+            : plain(d.name)}
         </p>
       </div>
-      <div className="flex shrink-0">{actions(d, true)}</div>
+      <div className="relative z-10 shrink-0"><ActionMenu label={`More actions for ${collection === 'builds' ? title(d) : String(d.skill_type ?? '')}`} items={menuFor(d)} /></div>
     </li>
   );
 
-  if (collection !== 'skills') return <ul className="divide-y divide-white/10">{items.map(row)}</ul>;
+  const [all, setAll] = useState(false);
+  if (collection !== 'skills') {
+    const shown = all ? items : items.slice(0, GROUP_LIMIT);
+    return (
+      <div className="flex flex-1 flex-col">
+        <ul className="group-list divide-y divide-white/10">{shown.map(row)}</ul>
+        {items.length > GROUP_LIMIT && (
+          <button type="button" className="mt-auto self-start pt-2 text-sm font-semibold text-primary hover:underline" aria-expanded={all} onClick={() => setAll((v) => !v)}>
+            {all ? 'Show less' : `Show all ${items.length}`}
+          </button>
+        )}
+      </div>
+    );
+  }
 
   const sections = [...SKILL_SECTIONS.map(([label]) => label), 'Other Skills']
     .map((s) => [s, items.filter((d) => sectionOf(d) === s).sort((a, b) => (a.order ?? 99) - (b.order ?? 99))] as const)
@@ -148,6 +220,16 @@ export function Manager({ collection }: { collection: CollectionKey }) {
   const [q, setQ] = useState('');
   const iconFor = useChoiceIcons();
   const [filters, setFilters] = useState<Record<string, string>>({});
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  // the cost icons add nothing as filters; set and echo-set filters show their set emoji
+  const filterIcon = (f: { key: string; label: string }, o: string) => (f.key === 'cost' ? undefined : iconFor(o, f.label));
+  const setIcon = (f: { key: string }) => (f.key === 'sonata_effects' || f.key === 'echo_set' ? (o: string) => iconFor(o) : undefined);
+  const [dense, setDense] = useState(false);
+  const toggleDense = () => setDense((d) => { try { localStorage.setItem('panel.cardsDense', d ? '0' : '1'); } catch { /* private mode */ } return !d; });
+  const [compact, setCompact] = useState(true);
+  const setDensity = (c: boolean) => { setCompact(c); try { localStorage.setItem('panel.filtersCompact', c ? '1' : '0'); } catch { /* private mode */ } };
+  const filtersId = useId();
+  const toggleFilters = () => setFiltersOpen((o) => { try { localStorage.setItem('panel.filtersOpen', o ? '0' : '1'); } catch { /* private mode */ } return !o; });
   const [page, setPage] = useState(1);
   const [mode, setMode] = useState<Mode>(null);
   const [busy, setBusy] = useState(false);
@@ -168,8 +250,9 @@ export function Manager({ collection }: { collection: CollectionKey }) {
   // Deep links from the Health page: ?q=<search> and ?edit=<record id>
   const pendingEdit = useRef<string | null>(null);
   const urlReady = useRef(false);
+  const firstParams = useRef<URLSearchParams | null>(null); // the address as it was on arrival, kept for the dev-mode double run of the effect below
   useEffect(() => {
-    const sp = new URLSearchParams(window.location.search);
+    const sp = (firstParams.current ??= new URLSearchParams(window.location.search));
     const search = sp.get('q');
     if (search) setQ(search);
     if (sp.get('tab') === 'archived') setTab('archived');
@@ -177,7 +260,10 @@ export function Manager({ collection }: { collection: CollectionKey }) {
     if (Number.isInteger(p) && p > 1) setPage(p);
     const fromUrl: Record<string, string> = {};
     for (const f of cfg.filters ?? []) { const v = sp.get(`f.${f.key}`); if (v) fromUrl[f.key] = v; }
-    if (Object.keys(fromUrl).length) setFilters(fromUrl);
+    if (Object.keys(fromUrl).length) { setFilters(fromUrl); setFiltersOpen(true); }
+    else { try { if (localStorage.getItem('panel.filtersOpen') === '1') setFiltersOpen(true); } catch { /* private mode */ } }
+    try { if (localStorage.getItem('panel.filtersCompact') === '0') setCompact(false); } catch { /* private mode */ }
+    try { if (localStorage.getItem('panel.cardsDense') === '1') setDense(true); } catch { /* private mode */ }
     pendingEdit.current = sp.get('edit');
     urlReady.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -279,23 +365,24 @@ export function Manager({ collection }: { collection: CollectionKey }) {
     return v == null || v === '' ? '—' : plain(v).replace(/[*][*]/g, '');
   };
 
-  const actions = (d: Doc, small = false) => {
-    const b = small ? 'btn btn-xs btn-ghost' : 'btn btn-sm btn-ghost';
-    return (
-      <>
-        <button className={b} aria-label={`View ${title(d)}`} onClick={() => setMode({ kind: 'view', doc: d })}>View</button>
-        <button className={b} aria-label={`Edit ${title(d)}`} onClick={() => setMode({ kind: 'edit', doc: d })}>Edit</button>
-        {d.archived ? (
-          <>
-            <button className={b} aria-label={`Restore ${title(d)}`} onClick={() => setMode({ kind: 'restore', doc: d })}>Restore</button>
-            <button className={`${b} text-error`} aria-label={`Delete ${title(d)} permanently`} onClick={() => setMode({ kind: 'delete', doc: d })}>Delete</button>
-          </>
-        ) : (
-          <button className={b} aria-label={`Archive ${title(d)}`} onClick={() => setMode({ kind: 'archive', doc: d })}>Archive</button>
-        )}
-      </>
-    );
-  };
+  const menuFor = (d: Doc): MenuItem[] => d.archived
+    ? [
+        { label: 'Edit', icon: <PencilIcon />, onSelect: () => setMode({ kind: 'edit', doc: d }) },
+        { label: 'Restore', icon: <RestoreIcon />, onSelect: () => setMode({ kind: 'restore', doc: d }) },
+        { label: 'Delete permanently', icon: <TrashIcon />, danger: true, separatorBefore: true, onSelect: () => setMode({ kind: 'delete', doc: d }) },
+      ]
+    : [
+        { label: 'Edit', icon: <PencilIcon />, onSelect: () => setMode({ kind: 'edit', doc: d }) },
+        { label: 'Archive', icon: <ArchiveIcon />, onSelect: () => setMode({ kind: 'archive', doc: d }) },
+      ];
+  const openView = (d: Doc) => setMode({ kind: 'view', doc: d });
+
+  // Edits in the add/edit dialog are not thrown away silently: closing it by any route asks first.
+  const [dirty, setDirty] = useState(false);
+  const [askDiscard, setAskDiscard] = useState(false);
+  useEffect(() => { setDirty(false); setAskDiscard(false); }, [mode?.kind, mode?.doc]);
+  const guardClose = () => { if (dirty) { setAskDiscard(true); return true; } return false; };
+  const closeForm = () => { if (!guardClose()) setMode(null); };
 
   const pageGroups = groups?.slice((cur - 1) * pageSize, cur * pageSize);
   const pageRows = groups ? null : visible.slice((cur - 1) * pageSize, cur * pageSize);
@@ -308,8 +395,8 @@ export function Manager({ collection }: { collection: CollectionKey }) {
           <p className="text-base-content/70">{cfg.blurb}</p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Link className="btn" href={`/import?c=${collection}`}>Import</Link>
-          <button className="btn btn-primary" onClick={() => setMode({ kind: 'create' })}>+ Add {cfg.singular.toLowerCase()}</button>
+          <Link className="btn" href={`/import?c=${collection}`}><ImportIcon />Import</Link>
+          <button className="btn btn-primary" onClick={() => setMode({ kind: 'create' })}><PlusIcon />Add {cfg.singular.toLowerCase()}</button>
         </div>
       </div>
 
@@ -332,35 +419,81 @@ export function Manager({ collection }: { collection: CollectionKey }) {
               <span className="sr-only">Search {cfg.label}</span>
               <input type="search" className="grow" placeholder={`Search ${cfg.label.toLowerCase()}…`} value={q} onChange={(e) => { setQ(e.target.value); setPage(1); }} />
             </label>
+            <button type="button" className={`btn btn-square ${dense ? 'btn-active' : ''}`} aria-pressed={dense} aria-label="Compact cards" title={dense ? 'Compact cards: on' : 'Compact cards: off'} onClick={toggleDense}>
+              {dense ? (
+                <svg aria-hidden="true" viewBox="0 0 20 20" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M3 5h14M3 10h14M3 15h14" /></svg>
+              ) : (
+                <svg aria-hidden="true" viewBox="0 0 20 20" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"><rect x="3" y="3" width="6" height="6" rx="1.2" /><rect x="11" y="3" width="6" height="6" rx="1.2" /><rect x="3" y="11" width="6" height="6" rx="1.2" /><rect x="11" y="11" width="6" height="6" rx="1.2" /></svg>
+              )}
+            </button>
+            {(cfg.filters?.length ?? 0) > 0 && (
+              <button type="button" className={`btn max-sm:px-3 ${filtersOpen ? 'btn-active' : ''}`} aria-expanded={filtersOpen} aria-controls={filtersId} aria-label={`Filters${Object.values(filters).filter(Boolean).length ? `, ${Object.values(filters).filter(Boolean).length} on` : ''}`} title="Filters" onClick={toggleFilters}>
+                <svg aria-hidden="true" viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 5h14M6 10h8M8.5 15h3" /></svg>
+                <span className="max-sm:hidden">Filters</span>
+                {Object.values(filters).filter(Boolean).length > 0 && <span className="badge badge-sm badge-primary">{Object.values(filters).filter(Boolean).length}</span>}
+                <svg aria-hidden="true" viewBox="0 0 20 20" className={`h-4 w-4 transition-transform ${filtersOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 7.5l5 5 5-5" /></svg>
+              </button>
+            )}
           </div>
 
           {(cfg.filters?.length ?? 0) > 0 && (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {cfg.filters!.map((f) => (
-                (options[f.key] ?? []).length <= 10 ? (
-                  <fieldset key={f.key} className="sm:col-span-2 lg:col-span-3">
-                    <legend className="mono-label mb-1 block">{f.label}</legend>
-                    <div role="radiogroup" aria-label={`Filter by ${f.label}`} className="flex flex-wrap gap-2">
-                      {['', ...(options[f.key] ?? [])].map((o) => {
-                        const on = (filters[f.key] ?? '') === o;
-                        return (
-                          <label key={o || 'all'} className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-1.5 text-sm transition ${on ? 'border-primary bg-primary/15 font-semibold' : 'border-white/10 bg-white/5 hover:border-white/30'}`}>
-                            <input type="radio" name={`flt-${f.key}`} className="radio radio-primary radio-xs" checked={on} onChange={() => setFilter(f.key, o)} />
-                            <ChoiceIcon src={o ? iconFor(o, f.label) : undefined} />
-                            {o || 'All'}
-                          </label>
-                        );
-                      })}
+            <div id={filtersId} className="reveal" data-open={filtersOpen} inert={!filtersOpen}>
+            <div className="space-y-3 border-t border-white/10 pt-4">
+              <div className="flex items-center justify-end gap-2">
+                <span className="mono-label" id={`${filtersId}-density`}>View</span>
+                <div role="group" aria-labelledby={`${filtersId}-density`} className="inline-flex rounded-full border border-white/10 bg-white/5 p-0.5">
+                  {([['Compact', true], ['Expanded', false]] as const).map(([name, value]) => (
+                    <button key={name} type="button" aria-pressed={compact === value} onClick={() => setDensity(value)}
+                      className={`rounded-full px-3 py-1 text-sm transition ${compact === value ? 'bg-primary text-primary-content font-semibold' : 'text-base-content/70 hover:text-base-content'}`}>
+                      {name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {compact ? (
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:flex lg:flex-nowrap">
+                  {cfg.filters!.map((f) => (
+                    <div key={f.key} className="min-w-0 lg:w-52 lg:flex-1">
+                      <span id={`flt-${f.key}`} className="mono-label mb-1 block truncate">{f.label}</span>
+                      {(options[f.key] ?? []).length <= 10 ? (
+                        <FilterMenu label={f.label} value={filters[f.key] ?? ''} options={options[f.key] ?? []} onChange={(v) => setFilter(f.key, v)} iconFor={(o) => filterIcon(f, o)} />
+                      ) : (
+                        <Combobox aria-label={`Filter by ${f.label}`} iconFor={setIcon(f)} value={filters[f.key] ?? ''} options={options[f.key] ?? []}
+                          clearLabel="All" onChange={(v) => setFilter(f.key, v)} />
+                      )}
                     </div>
-                  </fieldset>
-                ) : (
-                  <div key={f.key}>
-                    <span id={`flt-${f.key}`} className="mono-label mb-1 block">{f.label}</span>
-                    <Combobox aria-label={`Filter by ${f.label}`} value={filters[f.key] ?? ''} options={options[f.key] ?? []}
-                      clearLabel="All" onChange={(v) => setFilter(f.key, v)} />
-                  </div>
-                )
-              ))}
+                  ))}
+                </div>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {cfg.filters!.map((f) => (
+                    (options[f.key] ?? []).length <= 10 ? (
+                      <fieldset key={f.key} className="min-w-0 sm:col-span-2 lg:col-span-3">
+                        <legend className="mono-label mb-1 block">{f.label}</legend>
+                        <div role="radiogroup" aria-label={`Filter by ${f.label}`} className="flex flex-wrap gap-2">
+                          {['', ...(options[f.key] ?? [])].map((o) => {
+                            const on = (filters[f.key] ?? '') === o;
+                            return (
+                              <label key={o || 'all'} className={`flex cursor-pointer items-center gap-1.5 rounded-xl border px-2.5 py-1 text-sm transition ${on ? 'border-primary bg-primary/15 font-semibold' : 'border-white/10 bg-white/5 hover:border-white/30'}`}>
+                                <input type="radio" name={`flt-${f.key}`} className="radio radio-primary radio-xs" checked={on} onChange={() => setFilter(f.key, o)} />
+                                <ChoiceIcon src={o ? filterIcon(f, o) : undefined} muted={!on} />
+                                {o || 'All'}
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </fieldset>
+                    ) : (
+                      <div key={f.key} className="min-w-0">
+                        <span className="mono-label mb-1 block">{f.label}</span>
+                        <Combobox aria-label={`Filter by ${f.label}`} iconFor={setIcon(f)} value={filters[f.key] ?? ''} options={options[f.key] ?? []}
+                          clearLabel="All" onChange={(v) => setFilter(f.key, v)} />
+                      </div>
+                    )
+                  ))}
+                </div>
+              )}
+            </div>
             </div>
           )}
 
@@ -381,7 +514,7 @@ export function Manager({ collection }: { collection: CollectionKey }) {
       <Pagination page={cur} pages={pages} onPage={changePage} />
 
       {rows === null ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{Array.from({ length: 6 }).map((_, i) => <div key={i} className="skeleton h-32" />)}</div>
+        <ListSkeleton grouped={!!cfg.groupBy} dense={dense} />
       ) : total === 0 ? (
         <div className="rounded-box border border-dashed border-white/15 p-10 text-center">
           <p className="mb-3">{q || activeFilters.length ? 'Nothing matches your search and filters.' : tab === 'archived' ? 'No archived items.' : `No ${cfg.label.toLowerCase()} yet.`}</p>
@@ -389,77 +522,72 @@ export function Manager({ collection }: { collection: CollectionKey }) {
             : tab === 'active' && <button className="btn btn-primary btn-sm" onClick={() => setMode({ kind: 'create' })}>Add the first one</button>}
         </div>
       ) : pageGroups ? (
-        <ul className="grid gap-4 lg:grid-cols-2">
-          <AnimatePresence mode="popLayout" initial={false}>
+        <ul className={`grid grid-cols-[minmax(0,1fr)] ${dense ? 'gap-3' : 'gap-4'} lg:grid-cols-2`}>
+          <>
             {pageGroups.map(([name, items]) => (
-              <motion.li key={name} layout initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="card card-border bg-base-100">
-                <div className="card-body gap-3 p-4">
+              <motion.li key={name} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }} className="card card-border h-full bg-base-100">
+                <div className={`card-body h-full ${dense ? 'gap-1 p-3' : 'gap-3 p-4'}`}>
                   <div className="flex items-center gap-3">
-                    <Icon url={docIcon(collection, items[0])} label={name} />
+                    <Icon url={docIcon(collection, items[0])} label={name} size={dense ? 36 : 48} />
                     <div className="min-w-0 flex-1">
                       <h2 className="card-title truncate text-lg">{name}</h2>
                       <p className="mono-label">{items.length} {items.length === 1 ? cfg.singular.toLowerCase() : cfg.label.toLowerCase()}</p>
                     </div>
                     <button className="btn btn-sm" aria-label={`Add ${cfg.singular.toLowerCase()} for ${name}`}
-                      onClick={() => setMode({ kind: 'create', doc: { [cfg.groupBy!]: name } as Doc })}>+ Add</button>
+                      onClick={() => setMode({ kind: 'create', doc: { [cfg.groupBy!]: name } as Doc })}><PlusIcon />Add</button>
                   </div>
-                  <GroupItems collection={collection} items={items} title={title} actions={actions} />
+                  <GroupItems collection={collection} items={items} title={title} onOpen={openView} menuFor={menuFor} dense={dense} />
                 </div>
               </motion.li>
             ))}
-          </AnimatePresence>
+          </>
         </ul>
       ) : (
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <AnimatePresence mode="popLayout" initial={false}>
+        <ul className={`grid grid-cols-[minmax(0,1fr)] ${dense ? 'gap-3 sm:grid-cols-2 lg:grid-cols-4' : 'gap-4 sm:grid-cols-2 lg:grid-cols-3'}`}>
+          <>
             {pageRows!.map((d, i) => (
-              <motion.li key={d._id} layout initial={{ opacity: 0, scale: 0.92, y: 16 }}
-                animate={{ opacity: 1, scale: 1, y: 0, transition: { delay: Math.min(i, 12) * 0.03 } }}
-                exit={{ opacity: 0, scale: 0.9 }} whileHover={{ y: -3 }} className="card card-border bg-base-100">
-                <div className="card-body gap-3 p-4">
-                  <div className="flex items-center gap-3">
-                    <Icon url={docIcon(collection, d)} label={title(d)} />
-                    <div className="min-w-0">
-                      <h2 className="card-title truncate text-lg">{title(d)}</h2>
-                      {cfg.badge && d[cfg.badge] && <span className="badge badge-sm">{d[cfg.badge]}</span>}
-                    </div>
-                  </div>
-                  <dl className="grid grid-cols-3 gap-2 text-sm">
-                    {cfg.columns.map((c) => (
-                      <div key={c.key}><dt className="text-base-content/60">{c.label}</dt><dd className="truncate font-medium">{summary(d, c.key)}</dd></div>
-                    ))}
-                  </dl>
-                  <div className="card-actions justify-end">{actions(d)}</div>
-                </div>
+              <motion.li key={d._id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }} className="card card-border h-full overflow-hidden bg-base-100 transition-colors hover:border-primary/40">
+                <DocCard collection={collection} d={d} title={title(d)} onOpen={() => openView(d)} menu={menuFor(d)} dense={dense} />
               </motion.li>
             ))}
-          </AnimatePresence>
+          </>
         </ul>
       )}
 
       <Pagination page={cur} pages={pages} onPage={changePage} />
 
-      <Modal wide open={mode?.kind === 'view'} onClose={() => setMode(null)} title={mode?.doc ? title(mode.doc) : ''}>
+      <Modal wide open={mode?.kind === 'view'} onClose={() => setMode(null)} title={cfg.singular}>
         {mode?.doc && (
           <div className="space-y-4">
             {collection === 'builds' ? <BuildGuide doc={mode.doc} />
               : collection === 'weapons' ? <WeaponGuide doc={mode.doc} />
+              : collection === 'resonators' ? <ResonatorView doc={mode.doc} />
+              : collection === 'echoes' ? <EchoView doc={mode.doc} />
+              : collection === 'skills' ? <SkillView doc={mode.doc} />
               : cfg.fields.map((f) => (
                 <div key={f.key}><div className="text-sm font-medium text-base-content/60">{f.label}</div><ValueView f={f} v={getPath(mode.doc!, f.key)} /></div>
               ))}
             <div className="modal-action">
               <button className="btn" onClick={() => setMode(null)}>Close</button>
-              <button className="btn btn-primary" onClick={() => setMode({ kind: 'edit', doc: mode.doc })}>Edit</button>
+              <button className="btn btn-primary" onClick={() => setMode({ kind: 'edit', doc: mode.doc })}><PencilIcon />Edit</button>
             </div>
           </div>
         )}
       </Modal>
 
-      <Modal wide open={mode?.kind === 'edit' || mode?.kind === 'create'} onClose={() => setMode(null)}
+      <Modal wide open={mode?.kind === 'edit' || mode?.kind === 'create'} onClose={() => setMode(null)} beforeClose={guardClose}
         title={mode?.kind === 'create' ? `Add ${cfg.singular.toLowerCase()}` : `Edit ${mode?.doc ? title(mode.doc) : ''}`}>
         {(mode?.kind === 'edit' || mode?.kind === 'create') && (
-          <EntityForm fields={cfg.fields} initial={mode.doc} busy={busy} submitLabel={mode.kind === 'create' ? 'Add' : 'Save changes'} onSubmit={save} onCancel={() => setMode(null)} />
+          <EntityForm fields={cfg.fields} initial={mode.doc} busy={busy} submitLabel={mode.kind === 'create' ? `Add ${cfg.singular}` : 'Save changes'} onSubmit={save} onCancel={closeForm} onDirty={() => setDirty(true)} />
         )}
+      </Modal>
+
+      <Modal open={askDiscard} onClose={() => setAskDiscard(false)} title="Discard changes?">
+        <p>You have changes that are not saved. If you close this now, they will be lost.</p>
+        <div className="modal-action">
+          <button className="btn" onClick={() => setAskDiscard(false)}>Keep editing</button>
+          <button className="btn btn-error" onClick={() => { setAskDiscard(false); setDirty(false); setMode(null); }}><TrashIcon />Discard changes</button>
+        </div>
       </Modal>
 
       <Modal open={mode?.kind === 'archive'} onClose={() => setMode(null)} title="Archive this item?">
@@ -469,7 +597,7 @@ export function Manager({ collection }: { collection: CollectionKey }) {
         <div className="modal-action">
           <button className="btn" onClick={() => setMode(null)}>Cancel</button>
           <button className="btn btn-primary" disabled={busy} onClick={() => setArchived(mode!.doc!, true)}>
-            {busy && <span className="loading loading-spinner loading-sm" />} Archive
+            {busy ? <span className="loading loading-spinner loading-sm" /> : <ArchiveIcon />} Archive
           </button>
         </div>
       </Modal>
@@ -481,7 +609,7 @@ export function Manager({ collection }: { collection: CollectionKey }) {
         <div className="modal-action">
           <button className="btn" onClick={() => setMode(null)}>Cancel</button>
           <button className="btn btn-primary" disabled={busy} onClick={() => setArchived(mode!.doc!, false)}>
-            {busy && <span className="loading loading-spinner loading-sm" />} Restore
+            {busy ? <span className="loading loading-spinner loading-sm" /> : <RestoreIcon />} Restore
           </button>
         </div>
       </Modal>
@@ -546,7 +674,7 @@ export function Manager({ collection }: { collection: CollectionKey }) {
         </p>
         <div className="modal-action">
           <button className="btn" onClick={() => setMode(null)}>Cancel</button>
-          <button className="btn btn-error" disabled={busy} onClick={() => call(`/api/${collection}/${mode!.doc!._id}`, { method: 'DELETE' }, 'Deleted.')}>Delete</button>
+          <button className="btn btn-error" disabled={busy} onClick={() => call(`/api/${collection}/${mode!.doc!._id}`, { method: 'DELETE' }, 'Deleted.')}><TrashIcon />Delete</button>
         </div>
       </Modal>
     </div>

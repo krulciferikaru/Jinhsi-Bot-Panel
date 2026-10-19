@@ -1,11 +1,13 @@
 'use client';
+import { CopyIcon, PencilIcon, ReplaceIcon, SmileIcon, TrashIcon, UploadIcon } from './Icons';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { optimized } from '@/lib/img';
-import { AnimatePresence, motion } from 'motion/react';
+import { motion } from 'motion/react';
 import { Combobox } from './Combobox';
+import { ActionMenu, type MenuItem } from './ActionMenu';
+import { AssetGridSkeleton } from './Skeletons';
 import { Modal, Pagination } from './Manager';
 import { BulkUpload } from './BulkUpload';
-import { AssetTabs } from './AssetTabs';
 import { EmojiTargets, noTarget, targetList, type Targets } from './EmojiTargets';
 import { useToast } from './Toast';
 import { AutoLink } from './AutoLink';
@@ -16,12 +18,14 @@ type Asset = { folder: Folder; name: string; label: string; path: string; size: 
 type Data = { enabled: boolean; repo: string; branch: string; files: Asset[] };
 type Dialog =
   | { kind: 'upload'; folder?: Folder; name?: string }
-  | { kind: 'rename' | 'delete'; asset: Asset }
+  | { kind: 'rename' | 'delete' | 'emoji-add' | 'emoji-remove'; asset: Asset }
   | null;
 
 const FOLDER_LABEL: Record<Folder, string> = { CharacterIcons: 'Characters', EchoIcons: 'Echoes', WeaponIcons: 'Weapons' };
 const FOLDERS = Object.keys(FOLDER_LABEL) as Folder[];
 const PAGE = 24;
+/** same rule the server uses to name an icon's emoji: "Aero Predator" -> "AeroPredator" */
+const emojiKey = (label: string) => label.replace(/[^A-Za-z0-9_]+/g, ' ').trim().split(/\s+/).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join('').slice(0, 32).toLowerCase();
 const kb = (n: number) => (n >= 1024 * 1024 ? `${(n / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
 
 function Thumb({ a }: { a: Asset }) {
@@ -44,6 +48,8 @@ export function AssetLibrary() {
   const [tab, setTab] = useState<'all' | Folder>('all');
   const [q, setQ] = useState('');
   const [usage, setUsage] = useState('');
+  const [emojiFilter, setEmojiFilter] = useState('');
+  const [emojis, setEmojis] = useState<{ live: Set<string> | null; test: Set<string> | null }>({ live: null, test: null });
   const [page, setPage] = useState(1);
   const [dialog, setDialog] = useState<Dialog>(null);
   const [busy, setBusy] = useState(false);
@@ -68,6 +74,24 @@ export function AssetLibrary() {
     } catch (e: any) { setError(e.message); setData((d) => d ?? { enabled: false, repo: '', branch: '', files: [] }); }
   }, []);
   useEffect(() => { load(); }, [load]);
+  const loadEmojis = useCallback(async () => {
+    const get = async (t: 'live' | 'test') => {
+      try {
+        const r = await fetch(`/api/emojis?target=${t}`, { cache: 'no-store' });
+        const j = await r.json();
+        return r.ok ? new Set<string>((j.items as { name: string }[]).map((e) => e.name.toLowerCase())) : null;
+      } catch { return null; }
+    };
+    const [live, test] = await Promise.all([get('live'), get('test')]);
+    setEmojis({ live, test });
+  }, []);
+  useEffect(() => { loadEmojis(); }, [loadEmojis]);
+  /** which bots have an emoji for this icon (null lists mean that bot could not be reached) */
+  const emojiOn = (a: Asset) => {
+    const k = emojiKey(a.label);
+    return { live: emojis.live?.has(k) ?? false, test: emojis.test?.has(k) ?? false };
+  };
+  const emojiKnown = emojis.live !== null || emojis.test !== null;
   useEffect(() => { // deep link from the Health page: ?q=<search>
     const search = new URLSearchParams(window.location.search).get('q');
     if (search) setQ(search);
@@ -84,6 +108,8 @@ export function AssetLibrary() {
     setFile(null); setSync(true); setBots({ live: true, test: true });
     if (d?.kind === 'upload') { setFolder(d.folder ?? (tab === 'all' ? 'EchoIcons' : tab)); setName(d.name ?? ''); }
     if (d?.kind === 'rename') setName(d.asset.label);
+    if (d?.kind === 'emoji-add') setBots({ live: true, test: true });
+    if (d?.kind === 'emoji-remove') { const on = emojiOn(d.asset); setBots({ live: on.live, test: on.test }); }
     setDialog(d);
   };
 
@@ -98,9 +124,10 @@ export function AssetLibrary() {
     return (data?.files ?? [])
       .filter((a) => (tab === 'all' || a.folder === tab)
         && (!usage || (usage === 'Used') === a.usedBy.length > 0)
+        && (!emojiFilter || (emojiFilter === 'Has emoji') === (emojiOn(a).live || emojiOn(a).test))
         && (!t || a.name.toLowerCase().includes(t) || a.label.toLowerCase().includes(t) || a.usedBy.some((u) => u.name.toLowerCase().includes(t))))
       .sort((a, b) => a.label.localeCompare(b.label));
-  }, [data, tab, q, usage]);
+  }, [data, tab, q, usage, emojiFilter, emojis]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const pages = Math.max(1, Math.ceil(visible.length / PAGE));
   const cur = Math.min(page, pages);
@@ -147,6 +174,45 @@ export function AssetLibrary() {
       body: JSON.stringify({ folder: a.folder, name: a.name, clearRecords: sync && a.usedBy.length > 0 }) }),
     (j) => `Deleted${j.clearedRecords ? `, icon cleared on ${j.clearedRecords} record${j.clearedRecords > 1 ? 's' : ''}` : ''}.`);
   };
+  const addEmoji = () => {
+    const a = (dialog as { asset: Asset }).asset;
+    return run(() => fetch('/api/assets/emoji', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ folder: a.folder, name: a.name, label: a.label, targets: targetList(bots) }) }),
+    (j) => {
+      const ok = (j.results as any[]).filter((r) => r.code);
+      const bad = (j.results as any[]).filter((r) => r.error);
+      let m = ok.length ? `Emoji ready on ${ok.map((r) => r.target).join(' and ')}.` : 'No emoji was created.';
+      if (j.linked?.emojiSet) m += ` Filled in the emoji on ${a.label}.`;
+      if (bad.length) m += ` Problem: ${bad.map((r) => `${r.target}: ${r.error}`).join(' ')}`;
+      loadEmojis();
+      return m;
+    });
+  };
+  const removeEmoji = () => {
+    const a = (dialog as { asset: Asset }).asset;
+    return run(() => fetch('/api/assets/emoji', { method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ label: a.label, targets: targetList(bots) }) }),
+    (j) => {
+      const gone = (j.results as any[]).filter((r) => r.removed).map((r) => r.target);
+      const bad = (j.results as any[]).filter((r) => r.error);
+      let m = gone.length ? `Emoji removed from ${gone.join(' and ')}.` : 'Nothing was removed.';
+      if (bad.length) m += ` Problem: ${bad.map((r) => `${r.target}: ${r.error}`).join(' ')}`;
+      loadEmojis();
+      return m;
+    });
+  };
+  const menuFor = (a: Asset): MenuItem[] => {
+    const on = emojiOn(a);
+    const items: MenuItem[] = [{ label: 'Copy URL', icon: <CopyIcon />, onSelect: () => copy(a) }];
+    if (!canWrite) return items;
+    items.push({ label: 'Replace image', icon: <ReplaceIcon />, onSelect: () => open({ kind: 'upload', folder: a.folder, name: a.label }) });
+    if (emojiKnown) items.push(on.live || on.test
+      ? { label: 'Remove emoji', icon: <SmileIcon />, onSelect: () => open({ kind: 'emoji-remove', asset: a }) }
+      : { label: 'Add emoji', icon: <SmileIcon />, onSelect: () => open({ kind: 'emoji-add', asset: a }) });
+    items.push({ label: 'Rename', icon: <PencilIcon />, onSelect: () => open({ kind: 'rename', asset: a }) });
+    items.push({ label: 'Delete', icon: <TrashIcon />, danger: true, separatorBefore: true, onSelect: () => open({ kind: 'delete', asset: a }) });
+    return items;
+  };
   const copy = async (a: Asset) => {
     try { await navigator.clipboard.writeText(a.url); toast('success', 'Image URL copied.'); }
     catch { toast('error', 'Could not copy. Select the URL from the image link instead.'); }
@@ -157,18 +223,17 @@ export function AssetLibrary() {
 
   return (
     <div className="space-y-4">
-      <AssetTabs />
       <div className="flex flex-wrap items-end justify-between gap-4 scroll-mt-24">
         <div>
           <h1 className="text-3xl font-bold">Assets</h1>
           <p className="text-base-content/70">
-            Icons stored in {data?.repo ? <code>{data.repo}</code> : 'your GitHub repository'}. Changes here are committed to the <code>{data?.branch || 'main'}</code> branch.
+            Icon images in {data?.repo ? <code>{data.repo}</code> : 'your GitHub repository'}.
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
           <AutoLink enabled={canWrite} onDone={load} />
           <button className="btn" disabled={!canWrite} onClick={() => setBulkOpen(true)}>Bulk upload</button>
-          <button className="btn btn-primary" disabled={!canWrite} onClick={() => open({ kind: 'upload' })}>+ Upload image</button>
+          <button className="btn btn-primary" disabled={!canWrite} onClick={() => open({ kind: 'upload' })}><UploadIcon />Upload image</button>
         </div>
       </div>
 
@@ -201,6 +266,11 @@ export function AssetLibrary() {
             <div className="w-44">
               <Combobox aria-label="Filter by usage" value={usage} options={['Used', 'Unused']} clearLabel="Any usage" onChange={(v) => { setUsage(v); setPage(1); }} />
             </div>
+            {emojiKnown && (
+              <div className="w-44">
+                <Combobox aria-label="Filter by emoji" value={emojiFilter} options={['Has emoji', 'No emoji']} clearLabel="Any emoji" onChange={(v) => { setEmojiFilter(v); setPage(1); }} />
+              </div>
+            )}
           </div>
           <p className="text-sm text-base-content/70" aria-live="polite">
             {!data ? 'Loading…' : visible.length === 0 ? 'No images found' : `Showing ${(cur - 1) * PAGE + 1}–${Math.min(cur * PAGE, visible.length)} of ${visible.length} images`}
@@ -211,36 +281,38 @@ export function AssetLibrary() {
       <Pagination page={cur} pages={pages} onPage={setPage} />
 
       {!data ? (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">{Array.from({ length: 8 }).map((_, i) => <div key={i} className="skeleton h-56" />)}</div>
+        <AssetGridSkeleton />
       ) : visible.length === 0 ? (
         <div className="rounded-box border border-dashed border-white/15 p-10 text-center">
-          <p className="mb-3">{q || usage ? 'Nothing matches your search and filters.' : 'No images in this folder yet.'}</p>
-          {canWrite && !q && !usage && <button className="btn btn-primary btn-sm" onClick={() => open({ kind: 'upload' })}>Upload the first one</button>}
+          <p className="mb-3">{q || usage || emojiFilter ? 'Nothing matches your search and filters.' : 'No images in this folder yet.'}</p>
+          {canWrite && !q && !usage && !emojiFilter && <button className="btn btn-primary btn-sm" onClick={() => open({ kind: 'upload' })}>Upload the first one</button>}
         </div>
       ) : (
         <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          <AnimatePresence mode="popLayout" initial={false}>
+          <>
             {pageItems.map((a) => (
-              <motion.li key={a.path} layout initial={{ opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="card card-border bg-base-100">
+              <motion.li key={a.path} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }} className="card card-border bg-base-100">
                 <div className="card-body gap-2 p-3">
                   <Thumb a={a} />
-                  <div className="min-w-0">
-                    <h2 className="truncate font-semibold" title={a.name}>{a.label}</h2>
-                    <p className="mono-label truncate">{FOLDER_LABEL[a.folder]} · {kb(a.size)}</p>
+                  <div className="flex items-start justify-between gap-1">
+                    <div className="min-w-0">
+                      <h2 className="truncate font-semibold" title={a.name}>{a.label}</h2>
+                      <p className="mono-label truncate">{FOLDER_LABEL[a.folder]} · {kb(a.size)}</p>
+                    </div>
+                    <ActionMenu label={`More actions for ${a.label}`} items={menuFor(a)} />
                   </div>
+                  {emojiKnown && (() => {
+                    const on = emojiOn(a);
+                    const has = on.live || on.test;
+                    return <p><span className={`badge badge-sm ${has ? 'badge-success badge-soft' : 'badge-ghost'}`} title={has ? `On: ${[on.live && 'Live bot', on.test && 'Test bot'].filter(Boolean).join(', ')}` : 'No Discord emoji for this icon'}>{has ? `Has emoji${on.live && on.test ? '' : on.live ? ' (Live)' : ' (Test)'}` : 'No emoji'}</span></p>;
+                  })()}
                   {a.usedBy.length > 0
                     ? <p className="truncate text-sm text-primary" title={a.usedBy.map((u) => u.name).join(', ')}>Used by {a.usedBy.map((u) => u.name).join(', ')}</p>
                     : <p className="text-sm text-base-content/60">Not used by any record</p>}
-                  <div className="flex flex-wrap gap-1">
-                    <button className="btn btn-xs btn-ghost" aria-label={`Copy URL of ${a.label}`} onClick={() => copy(a)}>Copy URL</button>
-                    <button className="btn btn-xs btn-ghost" aria-label={`Replace image ${a.label}`} disabled={!canWrite} onClick={() => open({ kind: 'upload', folder: a.folder, name: a.label })}>Replace</button>
-                    <button className="btn btn-xs btn-ghost" aria-label={`Rename ${a.label}`} disabled={!canWrite} onClick={() => open({ kind: 'rename', asset: a })}>Rename</button>
-                    <button className="btn btn-xs btn-ghost text-error" aria-label={`Delete ${a.label}`} disabled={!canWrite} onClick={() => open({ kind: 'delete', asset: a })}>Delete</button>
-                  </div>
                 </div>
               </motion.li>
             ))}
-          </AnimatePresence>
+          </>
         </ul>
       )}
 
@@ -292,6 +364,47 @@ export function AssetLibrary() {
             </button>
           </div>
         </div>
+      </Modal>
+
+      {/* Add emoji */}
+      <Modal open={dialog?.kind === 'emoji-add'} onClose={() => setDialog(null)} title={`Add emoji for ${sel?.label ?? ''}`}>
+        {sel && (
+          <div className="space-y-4">
+            <p>Creates a Discord emoji named <code>{sel.label.replace(/[^A-Za-z0-9_]+/g, ' ').trim().split(/\s+/).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join('')}</code> from this image. If one already exists it is reused, and the matching record gets the Live bot’s code if its emoji is empty.</p>
+            <EmojiTargets value={bots} onChange={setBots} />
+            <div className="modal-action">
+              <button className="btn" onClick={() => setDialog(null)}>Cancel</button>
+              <button className="btn btn-primary" disabled={busy || noTarget(bots)} onClick={addEmoji}>
+                {busy ? <span className="loading loading-spinner loading-sm" /> : <SmileIcon />} Add emoji
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Remove emoji */}
+      <Modal open={dialog?.kind === 'emoji-remove'} onClose={() => setDialog(null)} title={`Remove emoji of ${sel?.label ?? ''}?`}>
+        {sel && (
+          <div className="space-y-4">
+            <p>Deletes the Discord emoji for this icon from the bots you choose. The image itself stays.</p>
+            <p role="alert" className="text-sm text-warning">Records and builds that contain the emoji code will show plain text instead. This cannot be undone.</p>
+            <fieldset className="space-y-2">
+              <legend className="mb-1 text-sm font-medium">Remove it from</legend>
+              {(['live', 'test'] as const).map((t) => (
+                <label key={t} className={`flex items-center gap-3 ${emojiOn(sel)[t] ? 'cursor-pointer' : 'opacity-50'}`}>
+                  <input type="checkbox" className="checkbox checkbox-sm" disabled={!emojiOn(sel)[t]} checked={bots[t]} onChange={(e) => setBots({ ...bots, [t]: e.target.checked })} />
+                  <span className="text-sm">{t === 'live' ? 'Live bot' : 'Test bot'}{emojiOn(sel)[t] ? '' : ' (no emoji there)'}</span>
+                </label>
+              ))}
+            </fieldset>
+            <div className="modal-action">
+              <button className="btn" onClick={() => setDialog(null)}>Cancel</button>
+              <button className="btn btn-error" disabled={busy || noTarget(bots)} onClick={removeEmoji}>
+                {busy ? <span className="loading loading-spinner loading-sm" /> : <TrashIcon />} Remove emoji
+              </button>
+            </div>
+          </div>
+        )}
       </Modal>
 
       {/* Rename */}

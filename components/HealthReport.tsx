@@ -2,6 +2,8 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Combobox } from './Combobox';
+import { EyeIcon, WrenchIcon } from './Icons';
+import { HealthSkeleton } from './Skeletons';
 import { COLLECTIONS, type CollectionKey } from '@/lib/schema';
 
 type Severity = 'error' | 'warning' | 'info';
@@ -62,7 +64,7 @@ export function HealthReport() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Health</h1>
-          <p className="text-base-content/70">A scan of your records and icon repository for things that are broken, missing or unused.</p>
+          <p className="text-base-content/70">Missing, broken and unused data.</p>
         </div>
         <button className="btn btn-primary" disabled={running} onClick={run}>
           {running && <span className="loading loading-spinner loading-sm" />} {running ? 'Scanning…' : 'Scan again'}
@@ -108,7 +110,7 @@ export function HealthReport() {
       </div>
 
       {!report ? (
-        <div className="space-y-3">{Array.from({ length: 3 }).map((_, i) => <div key={i} className="skeleton h-24" />)}</div>
+        <HealthSkeleton />
       ) : visible.length === 0 ? (
         <div className="rounded-box border border-dashed border-white/15 p-10 text-center">
           <p className="text-lg font-semibold">{total === 0 ? 'Everything looks healthy.' : 'No issues match these filters.'}</p>
@@ -140,7 +142,7 @@ export function HealthReport() {
                           <p className="truncate font-medium">{i.title} <span className="mono-label ml-1">{areaLabel(i.area)}</span></p>
                           <p className="text-sm text-base-content/60">{i.message}</p>
                         </div>
-                        {i.href && <Link href={i.href} className="btn btn-sm">{i.area === 'assets' ? 'View' : 'Fix'}</Link>}
+                        {i.href && <Link href={i.href} className="btn btn-sm">{i.area === 'assets' ? <><EyeIcon />View</> : <><WrenchIcon />Fix</>}</Link>}
                       </li>
                     ))}
                   </ul>
