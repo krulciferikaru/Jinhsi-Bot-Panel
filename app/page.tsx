@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { BotPanel } from '@/components/BotPanel';
+import { SetupLauncher } from '@/components/SetupLauncher';
 import { COLLECTIONS, COLLECTION_KEYS } from '@/lib/schema';
 import { getStore } from '@/lib/db';
 import { runHealth, type HealthReport } from '@/lib/health';
@@ -35,6 +36,8 @@ export default async function Home() {
       )}
 
       <BotPanel />
+
+      {!error && <SetupLauncher />}
 
       <section aria-labelledby="data-heading">
         <h2 id="data-heading" className="mb-3 text-xl font-bold">Data</h2>

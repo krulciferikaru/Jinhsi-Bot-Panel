@@ -1,6 +1,6 @@
 'use client';
 import { CopyIcon, PencilIcon, ReplaceIcon, SmileIcon, TrashIcon, UploadIcon } from './Icons';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { optimized } from '@/lib/img';
 import { motion } from 'motion/react';
 import { Combobox } from './Combobox';
@@ -30,13 +30,15 @@ const kb = (n: number) => (n >= 1024 * 1024 ? `${(n / 1024 / 1024).toFixed(1)} M
 
 function Thumb({ a }: { a: Asset }) {
   const [bad, setBad] = useState(false);
-  useEffect(() => setBad(false), [a.sha]);
+  const [loaded, setLoaded] = useState(false);
+  const ref = useRef<HTMLImageElement>(null);
+  useEffect(() => { setBad(false); setLoaded(ref.current?.complete ?? false); }, [a.sha]);
   return (
     <div className="checker grid aspect-square w-full place-items-center overflow-hidden rounded-xl">
       {bad
         ? <span className="text-3xl font-semibold text-[#ffd93b]">{a.label.slice(0, 1)}</span>
         // eslint-disable-next-line @next/next/no-img-element
-        : <img src={optimized(`${a.url}?v=${a.sha.slice(0, 7)}`, 160)} alt={`${a.label} icon`} loading="lazy" onError={() => setBad(true)} className="h-full w-full object-contain" />}
+        : <img ref={ref} src={optimized(`${a.url}?v=${a.sha.slice(0, 7)}`, 160)} alt={`${a.label} icon`} loading="lazy" onLoad={() => setLoaded(true)} onError={() => setBad(true)} className={`h-full w-full object-contain transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`} />}
     </div>
   );
 }

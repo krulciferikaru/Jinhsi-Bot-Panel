@@ -26,6 +26,17 @@ export type Activity = {
 
 export type ActivityQuery = { limit: number; skip: number; collection?: string; action?: string; q?: string };
 
+/** A paused "complete this resonator" guided setup, so it can be resumed later from any device. */
+export type Draft = {
+  _id?: string;
+  kind: 'resonator-setup';
+  title: string;
+  /** set once the resonator record exists; the build and skill steps hang off it */
+  resonatorId?: string;
+  step: number;
+  updatedAt: Date | string;
+};
+
 export interface Store {
   readonly kind: 'mongodb';
   list(c: CollectionKey): Promise<Doc[]>;
@@ -44,6 +55,12 @@ export interface Store {
   logList(q: ActivityQuery): Promise<{ items: Activity[]; total: number }>;
   logGet(id: string): Promise<Activity | null>;
   logMark(id: string, patch: Partial<Activity>): Promise<void>;
+
+  draftList(): Promise<Draft[]>;
+  draftGet(id: string): Promise<Draft | null>;
+  /** Insert a new draft, or replace the fields of an existing one (by _id). Returns the saved draft. */
+  draftSave(draft: Draft): Promise<Draft>;
+  draftDelete(id: string): Promise<boolean>;
 }
 
 // Existing documents use ObjectId ids; accept the hex string form from the UI.
@@ -123,11 +140,35 @@ class MongoStore implements Store {
   async logMark(id: string, patch: Partial<Activity>) {
     await (await this.col('activity_log')).updateOne({ _id: toId(id) }, { $set: patch });
   }
+
+  async draftList() {
+    const items = await (await this.col('drafts')).find().sort({ updatedAt: -1 }).toArray();
+    return items.map((d) => ({ ...d, _id: String(d._id) })) as Draft[];
+  }
+  async draftGet(id: string) {
+    const d = await (await this.col('drafts')).findOne({ _id: toId(id) });
+    return d ? ({ ...d, _id: String(d._id) } as Draft) : null;
+  }
+  async draftSave(draft: Draft) {
+    const col = await this.col('drafts');
+    const { _id, ...rest } = draft;
+    const body = { ...rest, updatedAt: new Date() };
+    if (_id) {
+      await col.updateOne({ _id: toId(_id) }, { $set: body });
+      return { ...body, _id: String(_id) } as Draft;
+    }
+    const r = await col.insertOne(body);
+    return { ...body, _id: String(r.insertedId) } as Draft;
+  }
+  async draftDelete(id: string) {
+    return ((await (await this.col('drafts')).deleteOne({ _id: toId(id) })).deletedCount ?? 0) > 0;
+  }
 }
 
 const g = globalThis as unknown as { __store?: Store };
 export function getStore(): Store {
-  if (!g.__store) {
+  // Rebuild when missing, or when a hot reload left an older instance that predates newer methods (dev only).
+  if (!g.__store || typeof (g.__store as Partial<Store>).draftList !== 'function') {
     const uri = process.env.MONGODB_URI?.trim();
     if (!uri) throw new Error('MONGODB_URI is not set. Add it to .env.local and restart the app.');
     g.__store = new MongoStore(uri, process.env.MONGODB_DB || 'wuthering_waves');
