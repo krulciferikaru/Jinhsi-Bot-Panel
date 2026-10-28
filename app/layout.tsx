@@ -70,7 +70,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <div className="hidden lg:block" aria-hidden="true" />
               </StickyHeader>
               <Providers>
-                <main id="main" className="relative z-10 mx-auto w-full max-w-6xl px-5 pb-16 pt-4 sm:px-8">{children}</main>
+                <main id="main" className="relative z-10 mx-auto w-full max-w-6xl grow px-5 pb-16 pt-4 sm:px-8">{children}</main>
                 <BackToTop />
               </Providers>
               <footer className="relative z-10 flex flex-wrap items-center justify-center gap-2 border-t border-white/10 px-5 py-5 sm:px-8">

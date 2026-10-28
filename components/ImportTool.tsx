@@ -53,6 +53,7 @@ export function ImportTool() {
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<{ created: number; updated: number; skipped: number; incomplete?: number; invalid: number; failures: { index: number; message: string }[] } | null>(null);
   const seq = useRef(0);
+  const applyKey = useRef(crypto.randomUUID()); // one key per preview; a retry reuses it so the import is not applied twice
 
   // honour /import?c=echoes
   useEffect(() => {
@@ -79,7 +80,7 @@ export function ImportTool() {
         const j = await r.json();
         if (mine !== seq.current) return;
         if (!r.ok) throw new Error(j.error);
-        setPreview(j); setError('');
+        setPreview(j); applyKey.current = crypto.randomUUID(); setError('');
       } catch (e: any) { if (mine === seq.current) { setError(e.message); setPreview(null); } }
       finally { if (mine === seq.current) setChecking(false); }
     }, 250);
@@ -128,7 +129,7 @@ export function ImportTool() {
   async function run() {
     setBusy(true);
     try {
-      const r = await fetch('/api/import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ collection, rows, mode, skipInvalid: leaveOut }) });
+      const r = await fetch('/api/import', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Idempotency-Key': applyKey.current }, body: JSON.stringify({ collection, rows, mode, skipInvalid: leaveOut }) });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error || 'Import failed');
       setDone(j); setConfirm(false); setText(''); setFileName(''); setPreview(null);

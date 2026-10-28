@@ -3,7 +3,7 @@ import { ArchiveIcon, ChevronLeftIcon, ChevronRightIcon, ImportIcon, PencilIcon,
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'motion/react';
-import { COLLECTIONS, SKILL_CATEGORY_LABELS, docIcon, emojiName, getPath, plain, statLabel, type CollectionKey, type Doc, type Field } from '@/lib/schema';
+import { COLLECTIONS, SKILL_CATEGORY_LABELS, docIcon, emojiName, getPath, plain, setPath, statLabel, type CollectionKey, type Doc, type Field } from '@/lib/schema';
 import { EntityForm, hydrate } from './EntityForm';
 import { Combobox } from './Combobox';
 import { ChoiceIcon, useChoiceIcons } from './ChoiceIcon';
@@ -16,10 +16,12 @@ import { properSetName } from '@/lib/sets';
 import { Icon } from './Icon';
 import { BuildGuide, WeaponGuide } from './Guides';
 import { useToast } from './Toast';
+import { cacheGet, cacheSet, withViewTransition } from '@/lib/client-cache';
+import { SetupLauncher } from './SetupLauncher';
 
 type Mode = { kind: 'view' | 'edit' | 'create' | 'delete' | 'archive' | 'restore'; doc?: Doc } | null;
 type Change = { field: Field; from: unknown; to: unknown };
-type Review = { kind: 'create' | 'edit'; values: Record<string, any>; changes: Change[] };
+type Review = { kind: 'create' | 'edit'; values: Record<string, any>; changes: Change[]; key: string };
 
 const isEmpty = (v: unknown) => v == null || v === '' || (Array.isArray(v) && v.length === 0);
 /** Human-readable value for the review screens. */
@@ -211,10 +213,10 @@ function GroupItems({ collection, items, title, onOpen, menuFor, dense }: {
   );
 }
 
-export function Manager({ collection }: { collection: CollectionKey }) {
+export function Manager({ collection, initialRows }: { collection: CollectionKey; initialRows?: Doc[] | null }) {
   const cfg = COLLECTIONS[collection];
   const toast = useToast();
-  const [rows, setRows] = useState<Doc[] | null>(null);
+  const [rows, setRows] = useState<Doc[] | null>(() => cacheGet<Doc[]>(`rows:${collection}`) ?? initialRows ?? null);
   const [error, setError] = useState('');
   const [tab, setTab] = useState<'active' | 'archived'>('active');
   const [q, setQ] = useState('');
@@ -242,10 +244,16 @@ export function Manager({ collection }: { collection: CollectionKey }) {
       const r = await fetch(`/api/${collection}`);
       const j = await r.json();
       if (!r.ok) throw new Error(j.error);
-      setRows(j); setError('');
+      setRows(j); cacheSet(`rows:${collection}`, j); setError('');
     } catch (e: any) { setError(e.message); setRows([]); }
   }, [collection]);
-  useEffect(() => { setRows(null); setFilters({}); setQ(''); setPage(1); load(); }, [load]);
+  useEffect(() => {
+    const cached = cacheGet<Doc[]>(`rows:${collection}`);
+    if (!cached && initialRows) cacheSet(`rows:${collection}`, initialRows); // warm the cache from the server render
+    setRows(cached ?? initialRows ?? null);
+    setFilters({}); setQ(''); setPage(1); load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [load, collection]);
 
   // Deep links from the Health page: ?q=<search> and ?edit=<record id>
   const pendingEdit = useRef<string | null>(null);
@@ -320,42 +328,67 @@ export function Manager({ collection }: { collection: CollectionKey }) {
   const activeFilters = Object.entries(filters).filter(([, v]) => v);
   const unit = groups ? 'resonators' : cfg.label.toLowerCase();
 
-  const changePage = (p: number) => { setPage(p); topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
-  const setFilter = (k: string, v: string) => { setFilters((s) => ({ ...s, [k]: v })); setPage(1); };
+  const changePage = (p: number) => { withViewTransition(() => setPage(p)); topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+  const setFilter = (k: string, v: string) => withViewTransition(() => { setFilters((s) => ({ ...s, [k]: v })); setPage(1); });
   const clearAll = () => { setFilters({}); setQ(''); setPage(1); };
 
   async function call(url: string, init: RequestInit, ok: string) {
     setBusy(true);
     try {
-      const r = await fetch(url, { ...init, headers: { 'Content-Type': 'application/json' } });
+      const r = await fetch(url, { ...init, headers: { 'Content-Type': 'application/json', ...init.headers } });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error || 'Request failed');
       toast('success', ok); setMode(null); setReview(null); await load();
     } catch (e: any) { toast('error', e.message); }
     finally { setBusy(false); }
   }
+  /**
+   * Apply the change to the on-screen list at once, then confirm it with the server in the background.
+   * On failure the list snaps back and an error is shown, so a bad request never leaves the UI lying.
+   */
+  async function optimistic(mutate: (rows: Doc[]) => Doc[], url: string, init: RequestInit, ok: string) {
+    const snapshot = rows;
+    setRows((rs) => (rs ? mutate(rs) : rs));
+    setMode(null); setReview(null);
+    try {
+      const r = await fetch(url, { ...init, headers: { 'Content-Type': 'application/json' } });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(j.error || 'Request failed');
+      toast('success', ok);
+      load(); // quietly reconcile with the server's canonical copy (no skeleton flash)
+    } catch (e: any) {
+      setRows(snapshot ?? null); // roll back to exactly what was there before
+      toast('error', e.message);
+    }
+  }
+
   /** Form submit: nothing is written yet. Show a review first, and skip it entirely if nothing changed. */
   const save = (v: Record<string, any>) => {
-    if (mode?.kind === 'create') { setReview({ kind: 'create', values: v, changes: [] }); return; }
+    if (mode?.kind === 'create') { setReview({ kind: 'create', values: v, changes: [], key: crypto.randomUUID() }); return; }
     const before = hydrate(cfg.fields, mode!.doc);
     const changes: Change[] = cfg.fields
       .filter((f) => JSON.stringify(before[f.key]) !== JSON.stringify(v[f.key]))
       .map((f) => ({ field: f, from: before[f.key], to: v[f.key] }));
     if (changes.length === 0) { toast('info', 'No changes to save.'); return; }
-    setReview({ kind: 'edit', values: v, changes });
+    setReview({ kind: 'edit', values: v, changes, key: crypto.randomUUID() });
   };
   const confirmSave = () => {
     if (!review) return;
     if (review.kind === 'create') {
-      call(`/api/${collection}`, { method: 'POST', body: JSON.stringify(review.values) }, `${cfg.singular} added.`);
+      call(`/api/${collection}`, { method: 'POST', headers: { 'Idempotency-Key': review.key }, body: JSON.stringify(review.values) }, `${cfg.singular} added.`);
     } else {
-      // Send only the fields that changed.
+      // Send only the fields that changed, and reflect them in the list straight away.
       const body = Object.fromEntries(review.changes.map((c) => [c.field.key, review.values[c.field.key]]));
-      call(`/api/${collection}/${mode!.doc!._id}`, { method: 'PATCH', body: JSON.stringify(body) }, `${cfg.singular} updated.`);
+      const id = mode!.doc!._id;
+      optimistic(
+        (rs) => rs.map((r) => (r._id === id ? review.changes.reduce<Doc>((acc, c) => setPath(acc, c.field.key, review.values[c.field.key]) as Doc, structuredClone(r) as Doc) : r)),
+        `/api/${collection}/${id}`, { method: 'PATCH', body: JSON.stringify(body) }, `${cfg.singular} updated.`);
     }
   };
   const setArchived = (d: Doc, archived: boolean) =>
-    call(`/api/${collection}/${d._id}`, { method: 'PATCH', body: JSON.stringify({ archived }) },
+    optimistic(
+      (rs) => rs.map((r) => (r._id === d._id ? { ...r, archived } : r)),
+      `/api/${collection}/${d._id}`, { method: 'PATCH', body: JSON.stringify({ archived }) },
       archived ? 'Archived. The bot will no longer show it.' : 'Restored.');
   const title = (d: Doc) => String(getPath(d, cfg.titleKey) ?? '');
   const summary = (d: Doc, key: string) => {
@@ -395,6 +428,7 @@ export function Manager({ collection }: { collection: CollectionKey }) {
           <p className="text-base-content/70">{cfg.blurb}</p>
         </div>
         <div className="flex flex-wrap gap-3">
+          {collection === 'resonators' && <SetupLauncher variant="button" />}
           <Link className="btn" href={`/import?c=${collection}`}><ImportIcon />Import</Link>
           <button className="btn btn-primary" onClick={() => setMode({ kind: 'create' })}><PlusIcon />Add {cfg.singular.toLowerCase()}</button>
         </div>
@@ -412,8 +446,8 @@ export function Manager({ collection }: { collection: CollectionKey }) {
         <div className="card-body gap-3 p-4">
           <div className="flex flex-wrap items-center gap-3">
             <div role="tablist" aria-label="Status" className="tabs tabs-box">
-              <button role="tab" className={`tab ${tab === 'active' ? 'tab-active' : ''}`} aria-selected={tab === 'active'} onClick={() => { setTab('active'); setPage(1); }}>Active</button>
-              <button role="tab" className={`tab ${tab === 'archived' ? 'tab-active' : ''}`} aria-selected={tab === 'archived'} onClick={() => { setTab('archived'); setPage(1); }}>Archived ({archivedCount})</button>
+              <button role="tab" className={`tab ${tab === 'active' ? 'tab-active' : ''}`} aria-selected={tab === 'active'} onClick={() => withViewTransition(() => { setTab('active'); setPage(1); })}>Active</button>
+              <button role="tab" className={`tab ${tab === 'archived' ? 'tab-active' : ''}`} aria-selected={tab === 'archived'} onClick={() => withViewTransition(() => { setTab('archived'); setPage(1); })}>Archived ({archivedCount})</button>
             </div>
             <label className="input input-bordered flex min-w-60 flex-1 items-center gap-2">
               <span className="sr-only">Search {cfg.label}</span>
@@ -674,7 +708,7 @@ export function Manager({ collection }: { collection: CollectionKey }) {
         </p>
         <div className="modal-action">
           <button className="btn" onClick={() => setMode(null)}>Cancel</button>
-          <button className="btn btn-error" disabled={busy} onClick={() => call(`/api/${collection}/${mode!.doc!._id}`, { method: 'DELETE' }, 'Deleted.')}><TrashIcon />Delete</button>
+          <button className="btn btn-error" disabled={busy} onClick={() => { const id = mode!.doc!._id; optimistic((rs) => rs.filter((r) => r._id !== id), `/api/${collection}/${id}`, { method: 'DELETE' }, 'Deleted.'); }}><TrashIcon />Delete</button>
         </div>
       </Modal>
     </div>

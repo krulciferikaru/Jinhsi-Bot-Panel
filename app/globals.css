@@ -61,18 +61,15 @@ h1, h2, h3, .card-title { letter-spacing: -0.04em; font-weight: 600; }
 /* ---------- Floating shell ---------- */
 .shell {
   position: relative;
-  max-width: 1600px;
-  margin: 0.75rem auto;
-  min-height: calc(100vh - 1.5rem);
-  min-height: calc(100svh - 1.5rem);
-  border-radius: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  min-height: 100vh;
+  min-height: 100svh;
   background: #0d0b08;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 25px 50px -12px rgba(0, 0, 0, 0.8);
   overflow: clip;
   isolation: isolate;
 }
-@media (min-width: 1700px) { .shell { margin-block: 1.5rem; } }
-@media (max-width: 640px) { .shell { margin: 0; border-radius: 0; } }
 
 /* Backdrop layers: 60px grid, noise, glow spheres (what the glass blurs) */
 .backdrop { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
@@ -459,4 +456,11 @@ html { -webkit-tap-highlight-color: rgba(255, 217, 59, 0.15); }
   .group-list > li, .toast > .alert, .page-in { animation: none; }
   .toast > .alert[data-leaving="true"] { transform: none; }
   .card:has(.doc-card-link):active { transform: none; }
+}
+
+/* ---------- View transitions on list changes (filter, tab, page) ---------- */
+/* A quick cross-fade so the grid morphs instead of snapping; off for reduced motion. */
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.18s; }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
 }

@@ -4,6 +4,7 @@ import { clean, fail, forCreate, parseCollection, validate, withDerived, withErr
 import { actionFor, diffChanges, record, titleOf } from '@/lib/activity';
 import { MAX_IMPORT_ROWS, identity, normalizeRow, requiredErrors, type Ctx } from '@/lib/import';
 import { getPath } from '@/lib/schema';
+import { withIdempotency } from '@/lib/idempotency';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,7 +19,7 @@ type RowResult = { index: number; status: Status; title: string; message: string
  * - If any row is invalid the import is refused unless skipInvalid is true (then only the valid rows are imported).
  * - One Activity entry covers the whole import and can be undone as a unit.
  */
-export const POST = withErrors(async (req: Request) => {
+export const POST = withErrors(withIdempotency(async (req: Request) => {
   const body = await req.json();
   const c = parseCollection(String(body.collection ?? ''));
   if (!c) return fail('Unknown collection.');
@@ -103,4 +104,4 @@ export const POST = withErrors(async (req: Request) => {
     });
   }
   return NextResponse.json({ created: created.length, updated: updated.length, skipped: counts.skip, incomplete: counts.incomplete, invalid: counts.error, failures });
-});
+}));

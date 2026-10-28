@@ -69,3 +69,13 @@ export function WrenchIcon({ className = 'h-4 w-4' }: { className?: string }) {
 export function EyeIcon({ className = 'h-4 w-4' }: { className?: string }) {
   return <svg {...base} className={`shrink-0 ${className}`}><path d="M2 10s3-5.5 8-5.5S18 10 18 10s-3 5.5-8 5.5S2 10 2 10z" /><circle cx="10" cy="10" r="2.3" /></svg>;
 }
+
+/** A check mark: this step is done. */
+export function CheckIcon({ className = 'h-4 w-4' }: { className?: string }) {
+  return <svg {...base} className={`shrink-0 ${className}`}><path d="M4.5 10.5l3.5 3.5 7.5-8" /></svg>;
+}
+
+/** A wand with a sparkle: start the guided setup. */
+export function WandIcon({ className = 'h-4 w-4' }: { className?: string }) {
+  return <svg {...base} className={`shrink-0 ${className}`}><path d="M5 15l8-8M12.5 4.5l1 1M15.5 7.5l1 1M4 11l1 1M9 3l.5 1.5L11 5l-1.5.5L9 7l-.5-1.5L7 5l1.5-.5L9 3z" /></svg>;
+}
